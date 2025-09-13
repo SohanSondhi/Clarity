@@ -1,0 +1,52 @@
+appId: com.clarity.app
+productName: Clarity
+directories:
+  buildResources: build
+  output: dist
+files:
+  - "out/**/*"
+  - "node_modules/**/*"
+  - "resources/**/*"
+asarUnpack:
+  - "resources/**/*"
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: build/icon.ico
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  deleteAppDataOnUninstall: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+
+mac:
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+  icon: build/icon.icns
+
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+  icon: build/icon.png
+
+extraResources:
+  - from: "../../models"
+    to: "models"
+  - from: "../../data"
+    to: "data"
+    filter: ["**/*"]
+  - from: "resources/python-backend"
+    to: "python-backend"
+    filter: ["**/*"]
+
+beforeBuild: npm run build:python
