@@ -7,6 +7,8 @@ export interface FileSystemItem {
   type: 'file' | 'folder';
   size: number;
   dateModified: Date;
+  description?: string;
+  tags?: string[];
   extension?: string;
   icon?: string;
 }
@@ -33,7 +35,7 @@ export interface SearchResult {
 }
 
 class FileExplorerAPI {
-  private baseUrl = 'http://127.0.0.1:8765';
+  private baseUrl = 'http://127.0.0.1:8000';
 
   // Mock data for development
   private mockFiles: FileSystemItem[] = [
@@ -138,7 +140,14 @@ class FileExplorerAPI {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      return await response.json();
+      const data = await response.json();
+      
+      // Convert date strings back to Date objects
+      return data.map((item: any) => ({
+        ...item,
+        dateModified: new Date(item.dateModified)
+      }));
+      
     } catch (error) {
       console.warn('API not available, using mock data:', error);
       // Return mock data filtered by path
