@@ -7,9 +7,12 @@
   "scripts": {
     "dev": "electron-vite dev",
     "build": "electron-vite build",
-    "build:win": "electron-vite build && electron-builder --win",
-    "build:mac": "electron-vite build && electron-builder --mac",
-    "build:linux": "electron-vite build && electron-builder --linux",
+    "prepare-release": "node scripts/prepare-release.js",
+    "build:python": "node scripts/build-python.js",
+    "build:win": "npm run build:python && electron-vite build && electron-builder --win",
+    "build:mac": "npm run build:python && electron-vite build && electron-builder --mac",
+    "build:linux": "npm run build:python && electron-vite build && electron-builder --linux",
+    "build:release": "npm run prepare-release && npm run build:win",
     "preview": "electron-vite preview",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
