@@ -192,5 +192,3 @@ def local_scrape(db_path, table_name, root_dir="/"):
             
             
 
-local_scrape("/Users/jean-pierrebenavidescruzatte/test-folder","test_db","/Users/jean-pierrebenavidescruzatte/CompArchHW/")
-

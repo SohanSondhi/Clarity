@@ -1,0 +1,294 @@
+// API helper for file explorer operations
+// Communicates with FastAPI backend at http://127.0.0.1:8765
+
+export interface FileSystemItem {
+  name: string;
+  path: string;
+  type: 'file' | 'folder';
+  size: number;
+  dateModified: Date;
+  extension?: string;
+  icon?: string;
+}
+
+export interface QuickAccessItem {
+  name: string;
+  path: string;
+  icon: string;
+}
+
+export interface DriveInfo {
+  name: string;
+  path: string;
+  label: string;
+  totalSpace: number;
+  freeSpace: number;
+  type: string;
+}
+
+export interface SearchResult {
+  query: string;
+  items: FileSystemItem[];
+  totalResults: number;
+}
+
+class FileExplorerAPI {
+  private baseUrl = 'http://127.0.0.1:8765';
+
+  // Mock data for development
+  private mockFiles: FileSystemItem[] = [
+    {
+      name: 'Documents',
+      path: 'C:/Users/User/Documents',
+      type: 'folder',
+      size: 0,
+      dateModified: new Date('2024-01-15'),
+      icon: '📁'
+    },
+    {
+      name: 'Downloads',
+      path: 'C:/Users/User/Downloads',
+      type: 'folder',
+      size: 0,
+      dateModified: new Date('2024-01-20'),
+      icon: '📁'
+    },
+    {
+      name: 'Pictures',
+      path: 'C:/Users/User/Pictures',
+      type: 'folder',
+      size: 0,
+      dateModified: new Date('2024-01-18'),
+      icon: '📁'
+    },
+    {
+      name: 'Desktop',
+      path: 'C:/Users/User/Desktop',
+      type: 'folder',
+      size: 0,
+      dateModified: new Date('2024-01-22'),
+      icon: '📁'
+    },
+    {
+      name: 'report.docx',
+      path: 'C:/Users/User/Documents/report.docx',
+      type: 'file',
+      size: 2048576,
+      dateModified: new Date('2024-01-21'),
+      extension: 'docx',
+      icon: '📄'
+    },
+    {
+      name: 'presentation.pptx',
+      path: 'C:/Users/User/Documents/presentation.pptx',
+      type: 'file',
+      size: 5242880,
+      dateModified: new Date('2024-01-19'),
+      extension: 'pptx',
+      icon: '📊'
+    },
+    {
+      name: 'image.jpg',
+      path: 'C:/Users/User/Pictures/image.jpg',
+      type: 'file',
+      size: 1048576,
+      dateModified: new Date('2024-01-17'),
+      extension: 'jpg',
+      icon: '🖼️'
+    }
+  ];
+
+  private mockQuickAccess: QuickAccessItem[] = [
+    { name: 'Desktop', path: 'C:/Users/User/Desktop', icon: '🖥️' },
+    { name: 'Downloads', path: 'C:/Users/User/Downloads', icon: '⬇️' },
+    { name: 'Documents', path: 'C:/Users/User/Documents', icon: '📁' },
+    { name: 'Pictures', path: 'C:/Users/User/Pictures', icon: '🖼️' }
+  ];
+
+  private mockDrives: DriveInfo[] = [
+    {
+      name: 'Local Disk (C:)',
+      path: 'C:/',
+      label: 'Windows',
+      totalSpace: 500000000000,
+      freeSpace: 250000000000,
+      type: 'NTFS'
+    },
+    {
+      name: 'Data (D:)',
+      path: 'D:/',
+      label: 'Data',
+      totalSpace: 1000000000000,
+      freeSpace: 800000000000,
+      type: 'NTFS'
+    }
+  ];
+
+  async getDirectoryContents(path: string): Promise<FileSystemItem[]> {
+    try {
+      const response = await fetch(`${this.baseUrl}/directory`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ path }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.warn('API not available, using mock data:', error);
+      // Return mock data filtered by path
+      return this.mockFiles.filter(item => 
+        item.path.startsWith(path) && 
+        item.path !== path &&
+        !item.path.substring(path.length + 1).includes('/')
+      );
+    }
+  }
+
+  async searchFiles(query: string): Promise<SearchResult> {
+    try {
+      const response = await fetch(`${this.baseUrl}/search`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.warn('Search API not available, using mock data:', error);
+      // Return mock search results
+      const filteredItems = this.mockFiles.filter(item =>
+        item.name.toLowerCase().includes(query.toLowerCase())
+      );
+      
+      return {
+        query,
+        items: filteredItems,
+        totalResults: filteredItems.length
+      };
+    }
+  }
+
+  async getQuickAccessItems(): Promise<QuickAccessItem[]> {
+    try {
+      const response = await fetch(`${this.baseUrl}/quick-access`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.warn('Quick access API not available, using mock data:', error);
+      return this.mockQuickAccess;
+    }
+  }
+
+  async getDrives(): Promise<DriveInfo[]> {
+    try {
+      const response = await fetch(`${this.baseUrl}/drives`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.warn('Drives API not available, using mock data:', error);
+      return this.mockDrives;
+    }
+  }
+
+  async createFolder(path: string, name: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseUrl}/create-folder`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ path, name }),
+      });
+      
+      return response.ok;
+    } catch (error) {
+      console.warn('Create folder API not available, simulating success:', error);
+      return true;
+    }
+  }
+
+  async deleteItem(path: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseUrl}/delete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ path }),
+      });
+      
+      return response.ok;
+    } catch (error) {
+      console.warn('Delete API not available, simulating success:', error);
+      return true;
+    }
+  }
+
+  async renameItem(oldPath: string, newName: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseUrl}/rename`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ oldPath, newName }),
+      });
+      
+      return response.ok;
+    } catch (error) {
+      console.warn('Rename API not available, simulating success:', error);
+      return true;
+    }
+  }
+
+  formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  getFileTypeFromExtension(extension: string): string {
+    const types: { [key: string]: string } = {
+      'pdf': 'PDF Document',
+      'docx': 'Microsoft Word Document',
+      'xlsx': 'Microsoft Excel Spreadsheet',
+      'pptx': 'Microsoft PowerPoint Presentation',
+      'txt': 'Text Document',
+      'jpg': 'JPEG Image',
+      'jpeg': 'JPEG Image',
+      'png': 'PNG Image',
+      'gif': 'GIF Image',
+      'mp4': 'MP4 Video',
+      'avi': 'AVI Video',
+      'mp3': 'MP3 Audio',
+      'wav': 'WAV Audio',
+      'zip': 'ZIP Archive',
+      'exe': 'Application'
+    };
+    return types[extension.toLowerCase()] || `${extension.toUpperCase()} File`;
+  }
+}
+
+export const fileAPI = new FileExplorerAPI();
