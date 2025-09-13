@@ -8,9 +8,7 @@ from keybert import KeyBERT
 from sentence_transformers import SentenceTransformer
 import lancedb
 import pandas as pd
-import pyarrow as pa
 from sklearn.metrics.pairwise import cosine_similarity
-
 
 
 #File Scraper class
@@ -182,11 +180,12 @@ def local_scrape(db_path, table_name, root_dir="/"):
                 )
             except Exception as e:
                 print(f"Error processing {file_path}: {e}")
-            
 
-
+        
 if __name__ == "__main__":
     db_path = "/Users/jean-pierrebenavidescruzatte/Clarity/apps/api/data/clarity_db"
     table_name = "files"
     root_dir = "/Users/jean-pierrebenavidescruzatte/CompArchHW"  
     local_scrape(db_path, table_name, root_dir)
+
+

@@ -8,3 +8,4 @@ keybert
 lancedb
 pandas 
 pyarrow 
+fastapi
