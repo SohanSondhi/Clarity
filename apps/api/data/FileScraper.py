@@ -9,9 +9,9 @@ from sentence_transformers import SentenceTransformer
 import lancedb
 import pandas as pd
 import pyarrow as pa
+from sklearn.metrics.pairwise import cosine_similarity
 
-#Connect to LanceDB 
- 
+
 
 #File Scraper class
 class FileScraper:
@@ -79,9 +79,8 @@ class FileScraper:
                 print(f"Unsupported file type: {file_extension}")
 
 class DBBuilder():
-
-    def __init__(self, path, table_name, json_data=None):
-        self.columns = ["Path", "Parent", "Tags", "Vector", "Similarities", "Name", "When_Created", "When_Last_Modified", "Description", "File_type"]
+    def __init__(self, path, table_name, json_data = None):
+        self.columns = ["Path", "Parent", "Vector", "Similarities", "Name", "When_Created", "When_Last_Modified", "Description", "File_type"]
         self._db = lancedb.connect(path)
         if table_name in self._db.table_names():
             self._tbl = self._db.open_table(table_name)
@@ -92,29 +91,28 @@ class DBBuilder():
             else:
                 self._tbl = self._db.create_table(table_name, pd.DataFrame(columns=self.columns))
         
-    def add_entry(self, Path, Parent, Tags, Vector, Similarities, Name, When_Created, When_Last_Modified, Description, File_type, **kwargs):
+    def add_entry(self, Path, Parent, Vector, Similarities, Name, When_Created, When_Last_Modified, Description, File_type):
         json_entry = {
-            "Path": Path,
-            "Parent": Parent,
-            "Tags": Tags,
-            "Vector": Vector,
-            "Similarities": Similarities,
-            "Name": Name,
-            "When_Created": When_Created,
-            "When_Last_Modified": When_Last_Modified,
-            "Description": Description,
-            "File_type": File_type
+            "Path": str(Path)if Path is not None else "",
+            "Parent": str(Parent) if Parent is not None else "",
+            "Vector": Vector if Vector is not None and Vector != [] else [],
+            "Similarities": Similarities if Similarities is not None and Similarities != [] else [],
+            "Name": str(Name) if Name is not None else "",
+            "When_Created": str(When_Created) if When_Created is not None else "",
+            "When_Last_Modified": str(When_Last_Modified) if When_Last_Modified is not None else "",
+            "Description": str(Description) if Description is not None else "",
+            "File_type": str(File_type) if File_type is not None else "" 
         }
-        json_entry.update(kwargs)
         self._tbl.add(pd.DataFrame([json_entry]))
 
-    def add_json(self, json_entry:str):
+    def add_json(self, json_entry):
         data = json.loads(json_entry)
         df = pd.DataFrame([data])
-        required_columns = ["Path", "Parent", "Tags", "Vector", "Similarities", "Name", "When_Created", "When_Last_Modified", "Description", "File_type"]
+        required_columns = ["Path", "Parent", "Vector", "Similarities", "Name", "When_Created", "When_Last_Modified", "Description", "File_type"]
         contains_all_columns = all(col in df.columns for col in required_columns)
         if not contains_all_columns:
             raise ValueError(f"Missing columns in JSON entry: {set(required_columns) - set(df.columns)}")
+        df = df[required_columns]  # Keep only required columns
         return df
 
     def to_json(self, output_file):
@@ -142,12 +140,9 @@ class Summarizer:
         # Return Tuple of summary and embeddings
         final_summary = self._summarizer(combined_summary, max_length=200, min_length=50, do_sample=False)[0]['summary_text']
         embeddings = self._embedder.encode(final_summary)
-        similarities = self._embedder.cosine_similarity([embeddings], [embeddings])[0]
+        chunk_embeddings = self._embedder.encode(text_chunks, convert_to_numpy=True)
+        similarities = cosine_similarity(chunk_embeddings)
         return (final_summary, embeddings, similarities)
-
-    def get_tags(self, text):
-        tags = self._bert.extract_keywords(text, keyphrase_ngram_range=(1,3), stop_words='english', top_n=5)
-        return tags
     
 def local_scrape(db_path, table_name, root_dir="/"):
     # Common system folders to exclude
@@ -172,13 +167,11 @@ def local_scrape(db_path, table_name, root_dir="/"):
                 if not text_chunks:
                     continue
                 summary, embeddings, similarities = summarizer.summarize(text_chunks)
-                tags = summarizer.get_tags(summary)
                 file_stats = os.stat(file_path)
                 file_type = os.path.splitext(filename)[1].lower()
                 db_builder.add_entry(
                     Path=file_path,
                     Parent=parent_path,
-                    Tags=tags,
                     Vector=embeddings.tolist(),
                     Similarities=similarities.tolist(),
                     Name=filename,
@@ -190,5 +183,10 @@ def local_scrape(db_path, table_name, root_dir="/"):
             except Exception as e:
                 print(f"Error processing {file_path}: {e}")
             
-            
 
+
+if __name__ == "__main__":
+    db_path = "/Users/jean-pierrebenavidescruzatte/Clarity/apps/api/data/clarity_db"
+    table_name = "files"
+    root_dir = "/Users/jean-pierrebenavidescruzatte/CompArchHW"  
+    local_scrape(db_path, table_name, root_dir)
