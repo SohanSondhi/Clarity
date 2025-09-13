@@ -189,6 +189,8 @@ def local_scrape(db_path, table_name, root_dir="/"):
                 )
             except Exception as e:
                 print(f"Error processing {file_path}: {e}")
-            
-            
 
+if __name__ == "__main__":
+    local_scrape("data/index/image_db.json", "db", "C:/Professional")
+            
+        
