@@ -148,3 +148,7 @@ release/
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+
+# chroma
+chroma_store/

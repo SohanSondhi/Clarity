@@ -2,7 +2,7 @@ import lancedb
 import os
 
 # connect to your database (relative to project root)
-db_path = os.path.join(os.path.dirname(__file__), "../../../../../data")
+db_path = "C:\Coding\Clarity-1\apps\api\data"
 db = lancedb.connect(db_path)
 
 # check available tables

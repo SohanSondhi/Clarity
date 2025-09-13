@@ -10,7 +10,6 @@ import lancedb
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 
-
 #File Scraper class
 class FileScraper:
     def __init__(self, file_path):
@@ -75,6 +74,7 @@ class FileScraper:
                     return self.chunk_text(file.read())
             else: 
                 print(f"Unsupported file type: {file_extension}")
+                return []  # Return empty list for unsupported files
 
 class DBBuilder():
     def __init__(self, path, table_name, json_data = None):
@@ -118,7 +118,6 @@ class DBBuilder():
             json.dump(self.data, f, ensure_ascii=False, indent=2)
     
 
-
 #Text Summarization and Tagging 
 class Summarizer: 
     def __init__(self):
@@ -145,6 +144,11 @@ class Summarizer:
 def local_scrape(db_path, table_name, root_dir="/"):
     # Common system folders to exclude
     exclude_dirs = {'/System', '/Library', '/private', '/dev', '/Volumes', '/Applications', '/usr', '/bin', '/sbin', '/etc', '/proc', '/tmp'}
+    
+    # File extensions to skip (system, config, binary files)
+    skip_extensions = {'.ini', '.cfg', '.conf', '.log', '.tmp', '.cache', '.db', '.sqlite', '.exe', '.dll', '.so', '.dylib', 
+                      '.img', '.iso', '.dmg', '.zip', '.tar', '.gz', '.rar', '.7z', '.bin', '.dat', '.lock', '.pid'}
+    
     seen_files = set()
     summarizer = Summarizer()
     db_builder = DBBuilder(db_path, table_name)
@@ -183,4 +187,4 @@ def local_scrape(db_path, table_name, root_dir="/"):
 
         
 if __name__ == "__main__":
-    local_scrape("data/index/image_db.json", "db", "C:/Professional/BVT_Prep")
+    local_scrape("C:/Coding/Clarity-1/apps/api/data", "db", "C:/Professional/CLIP_PAPERS")
