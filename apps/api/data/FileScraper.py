@@ -1,3 +1,6 @@
+import sys, os
+sys.path.append(os.path.dirname(__file__))
+
 import os
 import lancedb
 import pandas as pd
@@ -120,6 +123,11 @@ class Summarizer:
             out = self._model.generate(**inputs)
         summary = self._processor.decode(out[0], skip_special_tokens=True)
         return embeddings, summary
+    
+    """Embed a raw user query for search (no summarization)."""
+    def summarize_query(self, query: str):
+        embeddings = self._embedder.encode(query)
+        return embeddings, query
 
 
     
@@ -241,6 +249,6 @@ class LanceDBManager():
                     print(f"Error processing {file_path}: {e}")
 
         #Create text and image tables
-        self.db.create_table(text_table_name, schema=schema, data = text_data, mode="overwrite")
-        self.db.create_table(image_table_name, schema=schema, data = image_data, mode="overwrite")
+        self._db.create_table(text_table_name, schema=schema, data = text_data, mode="overwrite")
+        self._db.create_table(image_table_name, schema=schema, data = image_data, mode="overwrite")
 
