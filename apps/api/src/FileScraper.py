@@ -8,7 +8,10 @@ from keybert import KeyBERT
 from sentence_transformers import SentenceTransformer
 import lancedb
 import pandas as pd
+import pyarrow as pa
 from sklearn.metrics.pairwise import cosine_similarity
+
+db = lancedb.connect("/Users/jean-pierrebenavidescruzatte/test-db")
 
 #File Scraper class
 class FileScraper:
@@ -76,47 +79,6 @@ class FileScraper:
                 print(f"Unsupported file type: {file_extension}")
                 return []  # Return empty list for unsupported files
 
-class DBBuilder():
-    def __init__(self, path, table_name, json_data = None):
-        self.columns = ["Path", "Parent", "Vector", "Similarities", "Name", "When_Created", "When_Last_Modified", "Description", "File_type"]
-        self._db = lancedb.connect(path)
-        if table_name in self._db.table_names():
-            self._tbl = self._db.open_table(table_name)
-        else:
-            if json_data:
-                initial_df = self.add_json(json_data)
-                self._tbl = self._db.create_table(table_name, initial_df)
-            else:
-                self._tbl = self._db.create_table(table_name, pd.DataFrame(columns=self.columns))
-        
-    def add_entry(self, Path, Parent, Vector, Similarities, Name, When_Created, When_Last_Modified, Description, File_type):
-        json_entry = {
-            "Path": str(Path)if Path is not None else "",
-            "Parent": str(Parent) if Parent is not None else "",
-            "Vector": Vector if Vector is not None and Vector != [] else [],
-            "Similarities": Similarities if Similarities is not None and Similarities != [] else [],
-            "Name": str(Name) if Name is not None else "",
-            "When_Created": str(When_Created) if When_Created is not None else "",
-            "When_Last_Modified": str(When_Last_Modified) if When_Last_Modified is not None else "",
-            "Description": str(Description) if Description is not None else "",
-            "File_type": str(File_type) if File_type is not None else "" 
-        }
-        self._tbl.add(pd.DataFrame([json_entry]))
-
-    def add_json(self, json_entry):
-        data = json.loads(json_entry)
-        df = pd.DataFrame([data])
-        required_columns = ["Path", "Parent", "Vector", "Similarities", "Name", "When_Created", "When_Last_Modified", "Description", "File_type"]
-        contains_all_columns = all(col in df.columns for col in required_columns)
-        if not contains_all_columns:
-            raise ValueError(f"Missing columns in JSON entry: {set(required_columns) - set(df.columns)}")
-        df = df[required_columns]  # Keep only required columns
-        return df
-
-    def to_json(self, output_file):
-        with open(output_file, 'w', encoding='utf-8') as f:
-            json.dump(self.data, f, ensure_ascii=False, indent=2)
-    
 
 #Text Summarization and Tagging 
 class Summarizer: 
@@ -141,50 +103,84 @@ class Summarizer:
         similarities = cosine_similarity(chunk_embeddings)
         return (final_summary, embeddings, similarities)
     
-def local_scrape(db_path, table_name, root_dir="/"):
-    # Common system folders to exclude
-    exclude_dirs = {'/System', '/Library', '/private', '/dev', '/Volumes', '/Applications', '/usr', '/bin', '/sbin', '/etc', '/proc', '/tmp'}
-    
-    # File extensions to skip (system, config, binary files)
-    skip_extensions = {'.ini', '.cfg', '.conf', '.log', '.tmp', '.cache', '.db', '.sqlite', '.exe', '.dll', '.so', '.dylib', 
-                      '.img', '.iso', '.dmg', '.zip', '.tar', '.gz', '.rar', '.7z', '.bin', '.dat', '.lock', '.pid'}
-    
-    seen_files = set()
-    summarizer = Summarizer()
-    db_builder = DBBuilder(db_path, table_name)
+class LanceDBManager(): 
+    def __init__(self, db_path):
+        self.db = lancedb.connect(db_path)
 
-    for dirpath, dirnames, filenames in os.walk(root_dir):
-        # Remove system folders from traversal
-        dirnames[:] = [d for d in dirnames if os.path.join(dirpath, d) not in exclude_dirs]
-        for filename in filenames:
-            parent_path = os.path.abspath(dirpath)
-            file_id = f"{parent_path}/{filename}"
-            if file_id in seen_files: #Use localStorage to track seen files
-                continue  
-            seen_files.add(file_id)
-            file_path = os.path.join(dirpath, filename)
-            try:
-                scraper = FileScraper(file_path)
-                text_chunks = scraper.scrape()
-                if not text_chunks:
-                    continue
-                summary, embeddings, similarities = summarizer.summarize(text_chunks)
-                file_stats = os.stat(file_path)
-                file_type = os.path.splitext(filename)[1].lower()
-                db_builder.add_entry(
-                    Path=file_path,
-                    Parent=parent_path,
-                    Vector=embeddings.tolist(),
-                    Similarities=similarities.tolist(),
-                    Name=filename,
-                    When_Created=file_stats.st_ctime,
-                    When_Last_Modified=file_stats.st_mtime,
-                    Description=summary,
-                    File_type=file_type
-                )
-            except Exception as e:
-                print(f"Error processing {file_path}: {e}")
+    def create_table(self, table_name, data):
+        schema = pa.schema([
+                    pa.field("Path", pa.string()),
+                    pa.field("Parent", pa.string()),
+                    pa.field("Vector", pa.list_(pa.float32())),  # embedding vector
+                    pa.field("Similarities", pa.list_(pa.list_(pa.float32()))),  # similarity matrix
+                    pa.field("Name", pa.string()),
+                    pa.field("When_Created", pa.float64()),  # UNIX timestamp
+                    pa.field("When_Last_Modified", pa.float64()),
+                    pa.field("Description", pa.string()),
+                    pa.field("File_type", pa.string()),
+                ])    
+        
+        if len(data) > 0:  
+            self.db.create_table(table_name, schema=schema, data = data, mode="overwrite")
+            
+    def get_table(self, table_name):
+        if table_name in self.db.table_names():
+            return self.db.open_table(table_name)
+        else:
+            raise ValueError(f"Table {table_name} does not exist in the database.")
+        
+    def local_scrape(self, table_name, root_dir):
+        exclude_dirs = {'/System', '/Library', '/private', '/dev', '/Volumes', '/Applications', '/usr', '/bin', '/sbin', '/etc', '/proc', '/tmp'}
+        seen_files = set()
+        summarizer = Summarizer()
+        data = []
+
+        for dirpath, dirnames, filenames in os.walk(root_dir):
+            dirnames[:] = [d for d in dirnames if os.path.join(dirpath, d) not in exclude_dirs]
+            for filename in filenames:
+                parent_path = os.path.abspath(dirpath)
+                file_id = f"{parent_path}/{filename}"
+                if file_id in seen_files:
+                    print(f"Skipping already seen file: {file_id}")
+                    continue  
+                seen_files.add(file_id)
+                file_path = os.path.join(dirpath, filename)
+                try:
+                    scraper = FileScraper(file_path)
+                    text_chunks = scraper.scrape()
+                    if not text_chunks:
+                        print(f"Skipping {file_path}: No text chunks returned.")
+                        continue
+                    summary, embeddings, similarities = summarizer.summarize(text_chunks)
+                    file_stats = os.stat(file_path)
+                    file_type = os.path.splitext(filename)[1].lower()
+                    json_entry = {
+                        "Path": file_path,
+                        "Parent": parent_path,
+                        "Vector": embeddings.tolist(),  # Convert numpy array to list
+                        "Similarities": similarities.tolist(),  # Convert numpy array to list
+                        "Name": filename,
+                        "When_Created": float(file_stats.st_ctime),
+                        "When_Last_Modified": float(file_stats.st_mtime),
+                        "Description": summary,
+                        "File_type": file_type
+                    }
+                    data.append(json_entry)
+                    print(f"Inserted data for {file_path} into table '{table_name}'")
+                except Exception as e:
+                    print(f"Error processing {file_path}: {e}")
+        if len(data) > 0:  
+            self.create_table(table_name, data)
+            
 
         
 if __name__ == "__main__":
-    local_scrape("C:/Coding/Clarity-1/apps/api/data", "db", "C:/Professional/CLIP_PAPERS")
+    ROOT_DIR = "/Users/jean-pierrebenavidescruzatte/CompArchHW"
+    DB_PATH = "/Users/jean-pierrebenavidescruzatte/test-db"
+    TABLE_NAME = "Hello"
+
+    # Initialize LanceDB manager
+    db_manager = LanceDBManager(DB_PATH)
+
+    # Scrape local files and populate the database
+    db_manager.local_scrape(TABLE_NAME, ROOT_DIR)
