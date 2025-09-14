@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FluentProvider, webLightTheme } from '@fluentui/react-components';
-import { Sidebar } from './Sidebar';
 import { CommandBar } from './CommandBar';
 import { BreadcrumbBar } from './BreadcrumbBar';
 import { FileList } from './FileList';
@@ -21,6 +20,7 @@ export const FileExplorer: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [treeData, setTreeData] = useState<any>(null);
   const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
+  const [renamingItem, setRenamingItem] = useState<string | null>(null);
   const { toast } = useToast();
 
   const isSearching = Boolean(searchResults);
@@ -290,23 +290,72 @@ export const FileExplorer: React.FC = () => {
     }
   };
 
-  const handleRename = async (item: FileSystemItem) => {
+  const handleStartRename = (item: FileSystemItem) => {
+    // Start inline rename mode
+    setRenamingItem(item.path);
+  };
+
+  const handleRename = async (oldPath: string, newName: string) => {
+    if (!newName.trim()) {
+      setRenamingItem(null);
+      return;
+    }
+
     try {
-      const success = await fileAPI.renameItem(item.path, item.name);
+      // Guard: Only allow rename when the item exists in the indexed tree
+      if (treeData) {
+        const normalized = oldPath.replace(/\//g, '|');
+        const nodeEntry = Object.entries(treeData.nodes).find(([_id, node]: [string, any]) => node.path_abs === normalized);
+        if (!nodeEntry) {
+          toast({
+            title: 'Not indexed',
+            description: 'This item is not in the indexed tree. Navigate using the File Tree and try again.',
+            variant: 'destructive'
+          });
+          setRenamingItem(null);
+          return;
+        }
+      }
+
+      setLoading(true);
+      const success = await fileAPI.renameItem(oldPath, newName);
+      
       if (success) {
-        await loadDirectory(currentPath);
+        // Ask backend to rebuild and return the latest tree
+        try {
+          const resp = await fetch('http://127.0.0.1:8001/refresh', { method: 'POST' });
+          if (resp.ok) {
+            const newTree = await resp.json();
+            setTreeData(newTree);
+          }
+        } catch {}
+
+        // Refresh the current view
+        if (currentNodeId && treeData) {
+          loadFolderFromTree(currentNodeId);
+        } else {
+          await loadDirectory(currentPath);
+        }
+
+        const oldName = oldPath.split('/').pop() || oldPath;
         toast({
           title: 'Success',
-          description: `Item renamed successfully`
+          description: `Renamed "${oldName}" to "${newName}"`
         });
+      } else {
+        throw new Error('Rename operation returned false');
       }
     } catch (error) {
       console.error('Rename failed:', error);
+      const oldName = oldPath.split('/').pop() || oldPath;
       toast({
         title: 'Error',
-        description: 'Failed to rename item',
+        description: `Failed to rename "${oldName}". Please try again.`,
         variant: 'destructive'
       });
+    } finally {
+      setLoading(false);
+      setRenamingItem(null); // Clear renaming state
     }
   };
 
@@ -339,11 +388,24 @@ export const FileExplorer: React.FC = () => {
   };
 
   const handleRefresh = () => {
-    if (isSearching) {
-      handleSearch(searchQuery);
-    } else {
-      loadDirectory(currentPath);
-    }
+    const doRefresh = async () => {
+      try {
+        const resp = await fetch('http://127.0.0.1:8001/refresh', { method: 'POST' });
+        if (resp.ok) {
+          const newTree = await resp.json();
+          setTreeData(newTree);
+        }
+      } catch {}
+
+      if (isSearching) {
+        handleSearch(searchQuery);
+      } else if (currentNodeId && treeData) {
+        loadFolderFromTree(currentNodeId);
+      } else {
+        loadDirectory(currentPath);
+      }
+    };
+    doRefresh();
   };
 
   // Keyboard shortcuts
@@ -365,7 +427,7 @@ export const FileExplorer: React.FC = () => {
           if (selectedItems.length === 1) {
             const item = displayItems.find(item => item.path === selectedItems[0]);
             if (item) {
-              handleRename(item);
+              handleStartRename(item);
             }
           }
           break;
@@ -415,15 +477,10 @@ export const FileExplorer: React.FC = () => {
   return (
     <FluentProvider theme={webLightTheme}>
       <div className="flex h-screen bg-background text-foreground">
-        {/* Sidebar */}
-        <Sidebar 
-          currentPath={currentPath}
-          onNavigate={handleNavigate}
-        />
-
         {/* TreeView Panel */}
         <div className="w-80 border-r border-gray-200 bg-white">
           <TreeView 
+            data={treeData}
             onNodeSelect={(node) => {
               console.log('Selected node:', node.name);
               // For folders, load contents immediately on single click
@@ -456,7 +513,7 @@ export const FileExplorer: React.FC = () => {
             onRename={() => {
               if (selectedItems.length === 1) {
                 const item = displayItems.find(item => item.path === selectedItems[0]);
-                if (item) handleRename(item);
+                if (item) handleStartRename(item);
               }
             }}
             onDelete={handleDelete}
@@ -483,6 +540,8 @@ export const FileExplorer: React.FC = () => {
             onItemDoubleClick={handleItemDoubleClick}
             onSort={handleSort}
             onRename={handleRename}
+            renamingItem={renamingItem || undefined}
+            onStartRename={(path) => setRenamingItem(path)}
           />
 
           {/* Status Bar */}

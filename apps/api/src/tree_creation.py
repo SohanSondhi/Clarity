@@ -9,6 +9,8 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 import lancedb
 import pandas as pd
+import os
+from dotenv import load_dotenv, find_dotenv
 
 
 # ----------------------------- Utilities ----------------------------- #
@@ -357,7 +359,8 @@ class FileTreeBuilder:
         with open(out_path, "w", encoding="utf-8") as f:
             json.dump(payload, f, indent=2, ensure_ascii=False)
 
-        print(f"[OK] Tree saved → {out_path}")
+        # Avoid non-ASCII characters in console for Windows cp1252
+        print(f"[OK] Tree saved -> {out_path}")
         print(f"[SUMMARY] {metadata}")
         return payload
 
@@ -369,18 +372,12 @@ def main() -> None:
     Main function - Edit the parameters below to configure your tree builder.
     """
     
-    # ========== EDIT THESE PARAMETERS ========== #
-    
-    # Path to your LanceDB database directory
-    DB_PATH = "C:/Professional/test-db"
-    
-    # Name of the table in LanceDB containing your file metadata
-    TABLE_NAME = "Hello"
-    
-    # Where to save the output JSON file (where the API expects it)
-    OUTPUT_PATH = "../data/file_tree.json"
-    
-    # =========================================== #
+    # Load environment configuration (with fallbacks)
+    load_dotenv(find_dotenv())
+
+    DB_PATH = os.getenv("DB_PATH", "C:/Professional/test-db")
+    TABLE_NAME = os.getenv("DB_TABLE", "Hello")
+    OUTPUT_PATH = os.getenv("OUTPUT_PATH", "../data/file_tree.json")
     
     print(f"Configuration:")
     print(f"   Database: {DB_PATH}")

@@ -11,6 +11,25 @@ import pandas as pd
 import pyarrow as pa
 from sklearn.metrics.pairwise import cosine_similarity
 
+def normalize_path(path):
+    """
+    Normalize paths by replacing both forward and backward slashes with | delimiter.
+    """
+    if not path:
+        return ""
+    
+    # Replace both backslashes and forward slashes with |
+    normalized = str(path).replace("\\", "|").replace("/", "|")
+    
+    # Remove any double pipes that might occur
+    while "||" in normalized:
+        normalized = normalized.replace("||", "|")
+    
+    # Remove leading/trailing pipes
+    normalized = normalized.strip("|")
+    
+    return normalized
+
 #File Scraper class
 class FileScraper:
     def __init__(self, file_path):
@@ -118,8 +137,8 @@ class LanceDBManager():
             filename = os.path.basename(file_path)
             file_type = os.path.splitext(filename)[1].lower()
             json_entry = {
-                "Path": file_path,
-                "Parent": parent_path,
+                "Path": normalize_path(file_path),
+                "Parent": normalize_path(parent_path),
                 "Vector": embeddings.tolist(),  # Convert numpy array to list
                 "Similarities": similarities.tolist(),  # Convert numpy array to list
                 "Name": filename,
@@ -131,8 +150,6 @@ class LanceDBManager():
             self.db.insert(table_name, [json_entry])
         else:
             raise ValueError(f"Table {table_name} does not exist in the database.")  
-
-        
     
 
     def create_table(self, table_name, data):
@@ -187,8 +204,8 @@ class LanceDBManager():
                     file_stats = os.stat(file_path)
                     file_type = os.path.splitext(filename)[1].lower()
                     json_entry = {
-                        "Path": file_path,
-                        "Parent": parent_path,
+                        "Path": normalize_path(file_path),
+                        "Parent": normalize_path(parent_path),
                         "Vector": embeddings.tolist(),
                         "Similarities": similarities.tolist(),
                         "Name": filename,

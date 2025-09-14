@@ -40,11 +40,13 @@ interface TreeData {
 interface TreeViewProps {
   onNodeSelect?: (node: TreeNode) => void;
   onNodeDoubleClick?: (node: TreeNode) => void;
+  data?: TreeData | null; // Controlled tree data from parent (optional)
 }
 
 export const TreeView: React.FC<TreeViewProps> = ({ 
   onNodeSelect, 
-  onNodeDoubleClick 
+  onNodeDoubleClick,
+  data
 }) => {
   const [treeData, setTreeData] = useState<TreeData | null>(null);
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
@@ -54,18 +56,23 @@ export const TreeView: React.FC<TreeViewProps> = ({
 
   // Load tree data
   useEffect(() => {
+    // If parent provides data, use it and skip fetching
+    if (data) {
+      setTreeData(data);
+      setExpandedNodes(new Set(data.root_ids));
+      setLoading(false);
+      return;
+    }
+
     const loadTreeData = async () => {
       try {
-        // Fetch from your API endpoint instead of static file
         const response = await fetch('http://127.0.0.1:8001/tree');
         if (!response.ok) {
           throw new Error(`Failed to load tree data: ${response.status} - ${response.statusText}`);
         }
-        const data: TreeData = await response.json();
-        setTreeData(data);
-        
-        // Auto-expand root nodes
-        setExpandedNodes(new Set(data.root_ids));
+        const remote: TreeData = await response.json();
+        setTreeData(remote);
+        setExpandedNodes(new Set(remote.root_ids));
       } catch (err) {
         console.error('Error loading tree data:', err);
         setError(err instanceof Error ? err.message : 'Unknown error');
@@ -75,7 +82,7 @@ export const TreeView: React.FC<TreeViewProps> = ({
     };
 
     loadTreeData();
-  }, []);
+  }, [data]);
 
   // Get file icon based on extension
   const getFileIcon = (node: TreeNode) => {

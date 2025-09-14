@@ -2,8 +2,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import uvicorn
-# from .routes.directory import router as directory_router  # Commented out due to import issues
+
 from .routes.tree import router as tree_router
+from .routes.rename import router as rename_router
+from .routes.refresh import router as refresh_router
 
 app = FastAPI(
     title="Clarity API",
@@ -22,6 +24,8 @@ app.add_middleware(
 
 # Include routers
 app.include_router(tree_router, tags=["tree"])
+app.include_router(rename_router, tags=["rename"])
+app.include_router(refresh_router, tags=["refresh"])
 
 @app.get("/")
 async def root():
