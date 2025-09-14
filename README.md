@@ -16,7 +16,9 @@ python -m clarity_api.app
 
 
 # Run Tests
-
+cd C:\Coding\Clarity-1
+.\venv\Scripts\activate
+pytest
 
 
 # To get an executable
