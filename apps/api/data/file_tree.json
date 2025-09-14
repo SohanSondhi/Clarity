@@ -12,11 +12,11 @@
       "when_modified": null,
       "is_synthetic": true
     },
-    "7b1966e6e112e51e41ea1c4221af246f": {
-      "id": "7b1966e6e112e51e41ea1c4221af246f",
-      "path_abs": "C:|Professional",
+    "3393efc7ba0d049b4252c4bfc9b497fa": {
+      "id": "3393efc7ba0d049b4252c4bfc9b497fa",
+      "path_abs": "C:|Users",
       "parent_id": "8d6095a666c371a003417bc3edbf2b0f",
-      "name": "Professional",
+      "name": "Users",
       "is_dir": 1,
       "ext": "",
       "size_bytes": null,
@@ -24,11 +24,11 @@
       "when_modified": null,
       "is_synthetic": true
     },
-    "4132c040cb4b4c7373433a5fd65711f6": {
-      "id": "4132c040cb4b4c7373433a5fd65711f6",
-      "path_abs": "C:|Professional|BVT_Prep",
-      "parent_id": "7b1966e6e112e51e41ea1c4221af246f",
-      "name": "BVT_Prep",
+    "a2e881e05b883540514466a810d5fe1c": {
+      "id": "a2e881e05b883540514466a810d5fe1c",
+      "path_abs": "C:|Users|sohan",
+      "parent_id": "3393efc7ba0d049b4252c4bfc9b497fa",
+      "name": "sohan",
       "is_dir": 1,
       "ext": "",
       "size_bytes": null,
@@ -36,193 +36,166 @@
       "when_modified": null,
       "is_synthetic": true
     },
-    "61bf7b0807d22dceaa2bb84898b944f4": {
-      "id": "61bf7b0807d22dceaa2bb84898b944f4",
-      "path_abs": "C:|Professional|August_Resume_AnthonyLamelas.pdf",
-      "parent_id": "7b1966e6e112e51e41ea1c4221af246f",
-      "name": "August_Resume_AnthonyLamelas.pdf",
+    "d191fed529647b5c48a8988ff2a7d538": {
+      "id": "d191fed529647b5c48a8988ff2a7d538",
+      "path_abs": "C:|Users|sohan|Clarity",
+      "parent_id": "a2e881e05b883540514466a810d5fe1c",
+      "name": "Clarity",
+      "is_dir": 1,
+      "ext": "",
+      "size_bytes": null,
+      "when_created": null,
+      "when_modified": null,
+      "is_synthetic": true
+    },
+    "4f6513995a8cf9db7cc2e8d9f0ba7d71": {
+      "id": "4f6513995a8cf9db7cc2e8d9f0ba7d71",
+      "path_abs": "C:|Users|sohan|Clarity|Clarity",
+      "parent_id": "d191fed529647b5c48a8988ff2a7d538",
+      "name": "Clarity",
+      "is_dir": 1,
+      "ext": "",
+      "size_bytes": null,
+      "when_created": null,
+      "when_modified": null,
+      "is_synthetic": true
+    },
+    "341ae5e9cdc1f8b8bdb1c66fd6d4645a": {
+      "id": "341ae5e9cdc1f8b8bdb1c66fd6d4645a",
+      "path_abs": "C:|Users|sohan|Clarity|Clarity|apps",
+      "parent_id": "4f6513995a8cf9db7cc2e8d9f0ba7d71",
+      "name": "apps",
+      "is_dir": 1,
+      "ext": "",
+      "size_bytes": null,
+      "when_created": null,
+      "when_modified": null,
+      "is_synthetic": true
+    },
+    "499e5c7615349fb5c5562c6ecb7ad99e": {
+      "id": "499e5c7615349fb5c5562c6ecb7ad99e",
+      "path_abs": "C:|Users|sohan|Clarity|Clarity|apps|api",
+      "parent_id": "341ae5e9cdc1f8b8bdb1c66fd6d4645a",
+      "name": "api",
+      "is_dir": 1,
+      "ext": "",
+      "size_bytes": null,
+      "when_created": null,
+      "when_modified": null,
+      "is_synthetic": true
+    },
+    "c98f78bc40ac07686ebbe4e7d26dce12": {
+      "id": "c98f78bc40ac07686ebbe4e7d26dce12",
+      "path_abs": "C:|Users|sohan|Clarity|Clarity|apps|api|data",
+      "parent_id": "499e5c7615349fb5c5562c6ecb7ad99e",
+      "name": "data",
+      "is_dir": 1,
+      "ext": "",
+      "size_bytes": null,
+      "when_created": null,
+      "when_modified": null,
+      "is_synthetic": true
+    },
+    "8411f6f0be77c1c7222492fd16459d77": {
+      "id": "8411f6f0be77c1c7222492fd16459d77",
+      "path_abs": "C:|Users|sohan|Clarity|Clarity|apps|api|data|testdata",
+      "parent_id": "c98f78bc40ac07686ebbe4e7d26dce12",
+      "name": "testdata",
+      "is_dir": 1,
+      "ext": "",
+      "size_bytes": null,
+      "when_created": null,
+      "when_modified": null,
+      "is_synthetic": true
+    },
+    "fe0a77c74991de77e356857476aad201": {
+      "id": "fe0a77c74991de77e356857476aad201",
+      "path_abs": "C:|Users|sohan|Clarity|Clarity|apps|api|data|testdata|PH-UY_Final_Study_Guide.pdf",
+      "parent_id": "8411f6f0be77c1c7222492fd16459d77",
+      "name": "PH-UY_Final_Study_Guide.pdf",
       "is_dir": 0,
       "ext": "pdf",
       "size_bytes": null,
-      "when_created": 1755647208.429595,
-      "when_modified": 1755647208.5621774,
+      "when_created": 1757856953.5263455,
+      "when_modified": 1757856953.5263455,
       "is_synthetic": false
     },
-    "34ecf8e6c15c7b9d8280d2bc9d71233f": {
-      "id": "34ecf8e6c15c7b9d8280d2bc9d71233f",
-      "path_abs": "C:|Professional|August_Resume_AnthonyLamelas_26.pdf",
-      "parent_id": "7b1966e6e112e51e41ea1c4221af246f",
-      "name": "August_Resume_AnthonyLamelas_26.pdf",
+    "45f4a595d39a8ae2cbafa39e28a516d2": {
+      "id": "45f4a595d39a8ae2cbafa39e28a516d2",
+      "path_abs": "C:|Users|sohan|Clarity|Clarity|apps|api|data|testdata|RH 227 Schedule - Fall 2025.docx",
+      "parent_id": "8411f6f0be77c1c7222492fd16459d77",
+      "name": "RH 227 Schedule - Fall 2025.docx",
       "is_dir": 0,
-      "ext": "pdf",
+      "ext": "docx",
       "size_bytes": null,
-      "when_created": 1755454582.5125928,
-      "when_modified": 1755810974.893424,
+      "when_created": 1757856953.5263455,
+      "when_modified": 1757856953.5263455,
       "is_synthetic": false
     },
-    "c930d7c59df154b7baaea6d6f76e4964": {
-      "id": "c930d7c59df154b7baaea6d6f76e4964",
-      "path_abs": "C:|Professional|Cover_Letter_Anthony_Lamelas.pdf",
-      "parent_id": "7b1966e6e112e51e41ea1c4221af246f",
-      "name": "Cover_Letter_Anthony_Lamelas.pdf",
+    "2b4a4f39d16319f1e2dfca08b75bfbbb": {
+      "id": "2b4a4f39d16319f1e2dfca08b75bfbbb",
+      "path_abs": "C:|Users|sohan|Clarity|Clarity|apps|api|data|testdata|cat.png",
+      "parent_id": "8411f6f0be77c1c7222492fd16459d77",
+      "name": "cat.png",
       "is_dir": 0,
-      "ext": "pdf",
+      "ext": "png",
       "size_bytes": null,
-      "when_created": 1752381886.594382,
-      "when_modified": 1752381886.71152,
+      "when_created": 1757856953.5263455,
+      "when_modified": 1757856953.5263455,
       "is_synthetic": false
     },
-    "46a03c086c7bcc40db85bf9ad71fd5db": {
-      "id": "46a03c086c7bcc40db85bf9ad71fd5db",
-      "path_abs": "C:|Professional|BVT_Prep|Hedge.py",
-      "parent_id": "4132c040cb4b4c7373433a5fd65711f6",
-      "name": "Hedge.py",
-      "is_dir": 0,
-      "ext": "py",
-      "size_bytes": null,
-      "when_created": 1757284762.5011506,
-      "when_modified": 1757290359.4615736,
-      "is_synthetic": false
-    },
-    "692eff79fd228431c8c03cc0f7508f43": {
-      "id": "692eff79fd228431c8c03cc0f7508f43",
-      "path_abs": "C:|Professional|BVT_Prep|Hedge_opt.py",
-      "parent_id": "4132c040cb4b4c7373433a5fd65711f6",
-      "name": "Hedge_opt.py",
-      "is_dir": 0,
-      "ext": "py",
-      "size_bytes": null,
-      "when_created": 1757290387.5476108,
-      "when_modified": 1757689765.9744532,
-      "is_synthetic": false
-    },
-    "8f7348036f5833646485064c50ce91e5": {
-      "id": "8f7348036f5833646485064c50ce91e5",
-      "path_abs": "C:|Professional|BVT_Prep|Hedge_prac.py",
-      "parent_id": "4132c040cb4b4c7373433a5fd65711f6",
-      "name": "Hedge_prac.py",
-      "is_dir": 0,
-      "ext": "py",
-      "size_bytes": null,
-      "when_created": 1757686005.3191066,
-      "when_modified": 1757689887.4986093,
-      "is_synthetic": false
-    },
-    "11e2058691e38a85b384bea3ae41ea35": {
-      "id": "11e2058691e38a85b384bea3ae41ea35",
-      "path_abs": "C:|Professional|BVT_Prep|Manufacturing.py",
-      "parent_id": "4132c040cb4b4c7373433a5fd65711f6",
-      "name": "Manufacturing.py",
-      "is_dir": 0,
-      "ext": "py",
-      "size_bytes": null,
-      "when_created": 1757277689.607525,
-      "when_modified": 1757686336.8002212,
-      "is_synthetic": false
-    },
-    "060ceefc8559fba5607da27b0e051be9": {
-      "id": "060ceefc8559fba5607da27b0e051be9",
-      "path_abs": "C:|Professional|BVT_Prep|Manufacturing_opt.py",
-      "parent_id": "4132c040cb4b4c7373433a5fd65711f6",
-      "name": "Manufacturing_opt.py",
-      "is_dir": 0,
-      "ext": "py",
-      "size_bytes": null,
-      "when_created": 1757281335.5513384,
-      "when_modified": 1757282001.898355,
-      "is_synthetic": false
-    },
-    "ae779d515352a6dcd079bf7818a4b43a": {
-      "id": "ae779d515352a6dcd079bf7818a4b43a",
-      "path_abs": "C:|Professional|BVT_Prep|Manufacturing_prac.py",
-      "parent_id": "4132c040cb4b4c7373433a5fd65711f6",
-      "name": "Manufacturing_prac.py",
-      "is_dir": 0,
-      "ext": "py",
-      "size_bytes": null,
-      "when_created": 1757686000.3516443,
-      "when_modified": 1757686503.9707968,
-      "is_synthetic": false
-    },
-    "3c7e18f8f2e09cc1ca9644fa78572ce7": {
-      "id": "3c7e18f8f2e09cc1ca9644fa78572ce7",
-      "path_abs": "C:|Professional|BVT_Prep|WMA.opt.py",
-      "parent_id": "4132c040cb4b4c7373433a5fd65711f6",
-      "name": "WMA.opt.py",
-      "is_dir": 0,
-      "ext": "py",
-      "size_bytes": null,
-      "when_created": 1757280473.4504695,
-      "when_modified": 1757280806.0773594,
-      "is_synthetic": false
-    },
-    "6fce7c61079ce923f361a3594865317e": {
-      "id": "6fce7c61079ce923f361a3594865317e",
-      "path_abs": "C:|Professional|BVT_Prep|WMA.py",
-      "parent_id": "4132c040cb4b4c7373433a5fd65711f6",
-      "name": "WMA.py",
-      "is_dir": 0,
-      "ext": "py",
-      "size_bytes": null,
-      "when_created": 1757276785.7207048,
-      "when_modified": 1757277327.1946678,
-      "is_synthetic": false
-    },
-    "3841d29be82ebba6250a574dd4f9ab4b": {
-      "id": "3841d29be82ebba6250a574dd4f9ab4b",
-      "path_abs": "C:|Professional|BVT_Prep|WMA_prac.py",
-      "parent_id": "4132c040cb4b4c7373433a5fd65711f6",
-      "name": "WMA_prac.py",
-      "is_dir": 0,
-      "ext": "py",
-      "size_bytes": null,
-      "when_created": 1757685987.3760233,
-      "when_modified": 1757686319.2786524,
-      "is_synthetic": false
-    },
-    "2f5ce045be598340ddb4b223ce1d0c83": {
-      "id": "2f5ce045be598340ddb4b223ce1d0c83",
-      "path_abs": "C:|Professional|ID.jpg",
-      "parent_id": "7b1966e6e112e51e41ea1c4221af246f",
-      "name": "ID.jpg",
+    "c6e3474f84290b7276673e0b14504831": {
+      "id": "c6e3474f84290b7276673e0b14504831",
+      "path_abs": "C:|Users|sohan|Clarity|Clarity|apps|api|data|testdata|dog.jpg",
+      "parent_id": "8411f6f0be77c1c7222492fd16459d77",
+      "name": "dog.jpg",
       "is_dir": 0,
       "ext": "jpg",
       "size_bytes": null,
-      "when_created": 1754349387.6651628,
-      "when_modified": 1754349388.0610511,
+      "when_created": 1757856953.5263455,
+      "when_modified": 1757856953.5263455,
       "is_synthetic": false
     }
   },
   "adjacency_list": {
     "8d6095a666c371a003417bc3edbf2b0f": [
-      "7b1966e6e112e51e41ea1c4221af246f"
+      "3393efc7ba0d049b4252c4bfc9b497fa"
     ],
-    "7b1966e6e112e51e41ea1c4221af246f": [
-      "4132c040cb4b4c7373433a5fd65711f6",
-      "61bf7b0807d22dceaa2bb84898b944f4",
-      "34ecf8e6c15c7b9d8280d2bc9d71233f",
-      "c930d7c59df154b7baaea6d6f76e4964",
-      "2f5ce045be598340ddb4b223ce1d0c83"
+    "3393efc7ba0d049b4252c4bfc9b497fa": [
+      "a2e881e05b883540514466a810d5fe1c"
     ],
-    "4132c040cb4b4c7373433a5fd65711f6": [
-      "46a03c086c7bcc40db85bf9ad71fd5db",
-      "692eff79fd228431c8c03cc0f7508f43",
-      "8f7348036f5833646485064c50ce91e5",
-      "11e2058691e38a85b384bea3ae41ea35",
-      "060ceefc8559fba5607da27b0e051be9",
-      "ae779d515352a6dcd079bf7818a4b43a",
-      "3c7e18f8f2e09cc1ca9644fa78572ce7",
-      "6fce7c61079ce923f361a3594865317e",
-      "3841d29be82ebba6250a574dd4f9ab4b"
+    "a2e881e05b883540514466a810d5fe1c": [
+      "d191fed529647b5c48a8988ff2a7d538"
+    ],
+    "d191fed529647b5c48a8988ff2a7d538": [
+      "4f6513995a8cf9db7cc2e8d9f0ba7d71"
+    ],
+    "4f6513995a8cf9db7cc2e8d9f0ba7d71": [
+      "341ae5e9cdc1f8b8bdb1c66fd6d4645a"
+    ],
+    "341ae5e9cdc1f8b8bdb1c66fd6d4645a": [
+      "499e5c7615349fb5c5562c6ecb7ad99e"
+    ],
+    "499e5c7615349fb5c5562c6ecb7ad99e": [
+      "c98f78bc40ac07686ebbe4e7d26dce12"
+    ],
+    "c98f78bc40ac07686ebbe4e7d26dce12": [
+      "8411f6f0be77c1c7222492fd16459d77"
+    ],
+    "8411f6f0be77c1c7222492fd16459d77": [
+      "2b4a4f39d16319f1e2dfca08b75bfbbb",
+      "c6e3474f84290b7276673e0b14504831",
+      "fe0a77c74991de77e356857476aad201",
+      "45f4a595d39a8ae2cbafa39e28a516d2"
     ]
   },
   "root_ids": [
     "8d6095a666c371a003417bc3edbf2b0f"
   ],
   "metadata": {
-    "total_nodes": 16,
-    "total_files": 13,
-    "total_directories": 3,
-    "synthetic_directories": 3
+    "total_nodes": 13,
+    "total_files": 4,
+    "total_directories": 9,
+    "synthetic_directories": 9
   }
 }

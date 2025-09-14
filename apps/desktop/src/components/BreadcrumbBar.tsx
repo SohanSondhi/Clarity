@@ -19,7 +19,7 @@ interface BreadcrumbBarProps {
   searchQuery: string;
   isSearching: boolean;
   onNavigate: (path: string) => void;
-  onSearch: (query: string) => void;
+  onSearch: (query: string, searchType: 'text' | 'image') => void;
   onClearSearch: () => void;
 }
 
@@ -32,13 +32,14 @@ export const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({
   onClearSearch
 }) => {
   const [searchInput, setSearchInput] = useState(searchQuery);
+  const [searchType, setSearchType] = useState<'text' | 'image'>('text');
   
   const pathParts = currentPath.split('/').filter(part => part);
   
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchInput.trim()) {
-      onSearch(searchInput.trim());
+      onSearch(searchInput.trim(), searchType);
     }
   };
 
@@ -104,9 +105,18 @@ export const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({
         </div>
         
         <form onSubmit={handleSearchSubmit} className="flex items-center gap-2">
-          <div className="relative">
+          <div className="flex items-center gap-2">
+            <select
+              value={searchType}
+              onChange={(e) => setSearchType(e.target.value as 'text' | 'image')}
+              className="w-24 px-2 py-1 border border-gray-300 rounded text-sm"
+            >
+              <option value="text">Text</option>
+              <option value="image">Image</option>
+            </select>
+            
             <Input
-              placeholder="Search in current folder"
+              placeholder={searchType === 'text' ? "Search text content..." : "Describe an image (e.g., 'a cat', 'a dog')..."}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               contentBefore={<Search24Regular className="w-4 h-4 text-muted-foreground" />}

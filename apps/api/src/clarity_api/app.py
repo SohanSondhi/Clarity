@@ -10,6 +10,8 @@ from .routes.delete import router as delete_router
 from .routes.create import router as create_router
 from .routes.index import router as index_router
 from .routes.clear import router as clear_router
+from .routes.search_text import router as search_text_router
+from .routes.search_image import router as search_image_router
 
 app = FastAPI(
     title="Clarity API",
@@ -34,6 +36,8 @@ app.include_router(delete_router, tags=["delete"])
 app.include_router(create_router, tags=["create"])
 app.include_router(index_router, tags=["index"])
 app.include_router(clear_router, tags=["clear"])
+app.include_router(search_text_router, tags=["search-text"])
+app.include_router(search_image_router, tags=["search-image"])
 
 @app.get("/")
 async def root():

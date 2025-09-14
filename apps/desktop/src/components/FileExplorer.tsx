@@ -186,15 +186,41 @@ export const FileExplorer: React.FC = () => {
     }
   }, [sortField]);
 
-  const handleSearch = async (query: string) => {
+  const handleSearch = async (query: string, searchType: 'text' | 'image' = 'text') => {
     if (!query.trim()) return;
     
     setLoading(true);
     try {
-      const results = await fileAPI.searchFiles(query);
+      const results = await fileAPI.searchFiles(query, searchType);
       setSearchResults(results);
       setSearchQuery(query);
       setSelectedItems([]);
+      
+      // If we got results, show a success message and open the first result
+      if (results.items.length > 0) {
+        const firstResult = results.items[0];
+        toast({
+          title: 'Search Complete',
+          description: `Found ${results.totalResults} result(s). Opening: ${firstResult.name}`,
+        });
+        
+        // Open the file using the system default application
+        // This will work on Windows, Mac, and Linux
+        if (window.clarity && window.clarity.openInSystem) {
+          window.clarity.openInSystem(firstResult.path);
+        } else if (window.electronAPI && window.electronAPI.openFile) {
+          window.electronAPI.openFile(firstResult.path);
+        } else {
+          // Fallback: try to open with a web link (for web browsers)
+          console.log('File found:', firstResult.path);
+          // You could also show the file in a dialog or navigate to its location
+        }
+      } else {
+        toast({
+          title: 'No Results',
+          description: `No ${searchType} results found for "${query}"`,
+        });
+      }
     } catch (error) {
       console.error('Search failed:', error);
       toast({

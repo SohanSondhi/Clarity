@@ -34,6 +34,9 @@ export interface SearchResult {
   totalResults: number;
 }
 
+// Add search type enum
+export type SearchType = 'text' | 'image';
+
 class FileExplorerAPI {
   private baseUrl = 'http://127.0.0.1:8001';
 
@@ -132,21 +135,44 @@ class FileExplorerAPI {
     return [];
   }
 
-  async searchFiles(query: string): Promise<SearchResult> {
+  async searchFiles(query: string, searchType: SearchType = 'text'): Promise<SearchResult> {
     try {
-      const response = await fetch(`${this.baseUrl}/search`, {
+      let endpoint = '/search-text';
+      let body: any = { query };
+
+      if (searchType === 'image') {
+        endpoint = '/search-image';
+        body = { query: query };
+      }
+
+      const response = await fetch(`${this.baseUrl}${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ query }),
+        body: JSON.stringify(body),
       });
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      return await response.json();
+      const result = await response.json();
+      
+      // Convert API response to SearchResult format
+              return {
+                query: result.query,
+        items: result.results.map((item: any) => ({
+          name: item.path.split('/').pop() || item.path.split('\\').pop() || item.path,
+          path: item.path,
+          type: 'file' as const,
+          size: 0,
+          dateModified: new Date(),
+          extension: item.path.split('.').pop() || '',
+          description: `${searchType} search result`,
+        })),
+        totalResults: result.total_results
+      };
     } catch (error) {
       console.warn('Search API not available, using mock data:', error);
       // Return mock search results

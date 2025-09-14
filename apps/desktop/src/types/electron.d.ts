@@ -4,6 +4,9 @@ declare global {
     clarity?: {
       openInSystem: (path: string) => void;
     };
+    electronAPI?: {
+      openFile: (path: string) => void;
+    };
   }
 }
 
