@@ -2,8 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import uvicorn
-from .routes.directory import router as directory_router
-from .routes.search import router as search_router
+# from .routes.directory import router as directory_router  # Commented out due to import issues
+from .routes.tree import router as tree_router
 
 app = FastAPI(
     title="Clarity API",
@@ -21,8 +21,7 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(directory_router, tags=["directory"])
-app.include_router(search_router, tags=["search"])
+app.include_router(tree_router, tags=["tree"])
 
 @app.get("/")
 async def root():
@@ -33,4 +32,4 @@ async def health_check():
     return {"status": "healthy"}
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8001)

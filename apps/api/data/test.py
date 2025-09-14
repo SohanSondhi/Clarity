@@ -1,12 +1,12 @@
 import lancedb
 import pandas as pd
 import os
+from FileScraper import LanceDBManager
 
 # Connect to your database with correct path
-db_path = "/Users/jean-pierrebenavidescruzatte/test-db/"
+db_path = "C:/Professional/test-db"
 print(f"Connecting to database at: {os.path.abspath(db_path)}")
 
-db = lancedb.connect(db_path)
 
 
 # Check what tables exist

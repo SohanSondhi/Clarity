@@ -5,7 +5,6 @@ import hashlib
 import json
 import os
 from collections import defaultdict
-from pathlib import PureWindowsPath
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 import lancedb
@@ -42,11 +41,8 @@ class FileTreeBuilder:
 
     def normalize_path(self, raw: str) -> str:
         """
-        Canonicalize an absolute path into a Windows-like string with forward slashes.
-        - Mixed backslashes/forward slashes OK
-        - Drive letter uppercased (C:/...), path parts joined with '/'
-        - Trailing slash removed except for drive root (e.g., 'C:/')
-        NOTE: This produces a canonical form to store and display. For IDs we lower() this string.
+        Simple path normalization using | as delimiter.
+        Convert backslashes and forward slashes to | for consistent parsing.
         """
         if raw is None:
             return ""
@@ -54,39 +50,34 @@ class FileTreeBuilder:
         if not s:
             return ""
 
-        # Convert to Windows semantics irrespective of host OS
-        p = PureWindowsPath(s.replace("\\", "/"))
-
-        drive = (p.drive or "").rstrip(":")
-        parts = [seg for seg in p.parts if seg not in (p.drive, "/")]
-
-        if drive:
-            canonical = drive.upper() + ":/" + "/".join(parts[1:] if parts and parts[0] == "/" else parts)
-        else:
-            # No drive (could be UNC or relative); keep forward slashes
-            canonical = "/".join(parts) if parts else "/"
-
-        # Strip trailing slash except for drive root like 'C:/'
-        if canonical.endswith("/") and len(canonical) > 3:
-            canonical = canonical.rstrip("/")
-
-        return canonical
+        # Replace both backslashes and forward slashes with |
+        normalized = s.replace("\\", "|").replace("/", "|")
+        
+        # Remove any double pipes that might occur
+        while "||" in normalized:
+            normalized = normalized.replace("||", "|")
+        
+        # Remove leading/trailing pipes
+        normalized = normalized.strip("|")
+        
+        return normalized
 
     def normalized_parent(self, path_abs: str) -> str:
         """
-        Return the canonical parent path of a canonical absolute path.
-        Empty string means "no parent" (drive root).
+        Return the parent path using | delimiter.
+        Empty string means "no parent" (root).
         """
         if not path_abs:
             return ""
-        p = PureWindowsPath(path_abs.replace("\\", "/"))
-        parent = p.parent
-        parent_str = str(parent).replace("\\", "/")
-
-        # For roots: parent is "" (e.g., 'C:/' -> '')
-        if parent_str in (".", "/") or parent_str.lower() == p.drive.lower():
-            return ""
-        return self.normalize_path(parent_str)
+        
+        # Split by | and remove the last part to get parent
+        parts = path_abs.split("|")
+        if len(parts) <= 1:
+            return ""  # No parent (this is root)
+        
+        # Join all parts except the last one
+        parent_parts = parts[:-1]
+        return "|".join(parent_parts)
 
     def generate_id(self, canonical_path_abs: str) -> str:
         """
@@ -132,14 +123,18 @@ class FileTreeBuilder:
         Priority:
           1) Explicit File_type label (folder/dir/directory)
           2) Path appears as a Parent somewhere
-          3) Heuristic: no suffixes → likely a directory
+          3) Heuristic: no file extension → likely a directory
         """
         if human_is_folder_label(file_type):
             return True
         if path_norm in parent_set:
             return True
-        # Suffix heuristic
-        return len(PureWindowsPath(path_norm).suffixes) == 0
+        # Extension heuristic: if the last part has no extension, likely a directory
+        parts = path_norm.split("|")
+        if parts:
+            last_part = parts[-1]
+            return "." not in last_part
+        return False
 
     def create_node(
         self,
@@ -157,9 +152,23 @@ class FileTreeBuilder:
         """
         Create a node record. `path_abs` and `parent_abs` must already be canonical (normalize_path).
         """
-        # Fallback name from path
-        disp_name = name if (name and name.strip()) else PureWindowsPath(path_abs).name
-        ext = "" if is_dir else (PureWindowsPath(path_abs).suffix or "").lower()
+        # Fallback name from path using | delimiter
+        if name and name.strip():
+            disp_name = name
+        else:
+            # Get the last part of the path (after last |)
+            parts = path_abs.split("|")
+            disp_name = parts[-1] if parts else path_abs
+        
+        # Extract extension from display name
+        if is_dir:
+            ext = ""
+        else:
+            # Find the last dot in the name
+            if "." in disp_name:
+                ext = disp_name.split(".")[-1].lower()
+            else:
+                ext = ""
 
         node_id = self.generate_id(path_abs)
         parent_id = self.generate_id(parent_abs) if parent_abs else None
@@ -242,6 +251,7 @@ class FileTreeBuilder:
         dirs_processed = 0
         for row in df.itertuples(index=False):
             path_norm: str = getattr(row, "Path_norm")
+            print(f"   Processing row: {path_norm}")
             if not path_norm:
                 continue
 
@@ -367,8 +377,8 @@ def main() -> None:
     # Name of the table in LanceDB containing your file metadata
     TABLE_NAME = "Hello"
     
-    # Where to save the output JSON file (relative to current directory)
-    OUTPUT_PATH = "data/file_tree.json"
+    # Where to save the output JSON file (where the API expects it)
+    OUTPUT_PATH = "../data/file_tree.json"
     
     # =========================================== #
     
@@ -409,7 +419,6 @@ def main() -> None:
         print("   - Verify the table name matches your LanceDB table")
         print("   - Ensure the output directory can be created")
         raise
-
 
 if __name__ == "__main__":
     main()

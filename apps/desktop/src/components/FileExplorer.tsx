@@ -5,6 +5,7 @@ import { CommandBar } from './CommandBar';
 import { BreadcrumbBar } from './BreadcrumbBar';
 import { FileList } from './FileList';
 import { StatusBar } from './StatusBar';
+import { TreeView } from './TreeView';
 import { FileSystemItem, fileAPI, SearchResult } from '../lib/api';
 import { useToast } from '../hooks/use-toast';
 
@@ -18,14 +19,77 @@ export const FileExplorer: React.FC = () => {
   const [searchResults, setSearchResults] = useState<SearchResult | null>(null);
   const [clipboard, setClipboard] = useState<{ items: string[], operation: 'copy' | 'cut' } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [treeData, setTreeData] = useState<any>(null);
+  const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const isSearching = Boolean(searchResults);
   const displayItems = isSearching ? searchResults!.items : items;
 
+  // Convert tree node to FileSystemItem
+  const convertTreeNodeToFileSystemItem = (node: any): FileSystemItem => {
+    return {
+      name: node.name,
+      path: node.path_abs.replace(/\|/g, '/'), // Convert | back to / for display
+      type: node.is_dir === 1 ? 'folder' : 'file',
+      size: node.size_bytes || 0,
+      dateModified: node.when_modified ? new Date(node.when_modified * 1000) : new Date(),
+      extension: node.ext || undefined,
+      description: `Tree item: ${node.name}`,
+    };
+  };
+
+  // Load folder contents from tree data
+  const loadFolderFromTree = useCallback((nodeId: string) => {
+    if (!treeData) return;
+    
+    const node = treeData.nodes[nodeId];
+    if (!node) return;
+
+    // Get children from adjacency list (preserves order!)
+    const childIds = treeData.adjacency_list[nodeId] || [];
+    const childItems: FileSystemItem[] = childIds.map((childId: string) => {
+      const childNode = treeData.nodes[childId];
+      return convertTreeNodeToFileSystemItem(childNode);
+    });
+
+    // Update the file list
+    setItems(childItems);
+    setCurrentPath(node.path_abs.replace(/\|/g, '/'));
+    setCurrentNodeId(nodeId);
+    setSelectedItems([]);
+    
+    console.log(`Loaded ${childItems.length} items from tree node:`, node.name);
+  }, [treeData]);
+
   useEffect(() => {
     loadDirectory(currentPath);
   }, [currentPath]);
+
+  // Load tree data on startup
+  useEffect(() => {
+    const loadTreeData = async () => {
+      try {
+        // Fetch from your API endpoint instead of static file
+        const response = await fetch('http://127.0.0.1:8001/tree');
+        if (response.ok) {
+          const data = await response.json();
+          setTreeData(data);
+          console.log('Tree data loaded:', data.metadata);
+        }
+      } catch (error) {
+        console.warn('Could not load tree data:', error);
+      }
+    };
+    loadTreeData();
+  }, []);
+
+  // Load root level when tree data is available
+  useEffect(() => {
+    if (treeData && treeData.root_ids && treeData.root_ids.length > 0) {
+      loadFolderFromTree(treeData.root_ids[0]);
+    }
+  }, [treeData, loadFolderFromTree]);
 
   const loadDirectory = async (path: string) => {
     setLoading(true);
@@ -50,8 +114,25 @@ export const FileExplorer: React.FC = () => {
       setSearchResults(null);
       setSearchQuery('');
     }
+    
+    // Check if this path exists in our tree data
+    if (treeData) {
+      // Find node by path
+      const normalizedPath = path.replace(/\//g, '|');
+      const nodeEntry = Object.entries(treeData.nodes).find(([_, node]: [string, any]) => 
+        node.path_abs === normalizedPath
+      );
+      
+      if (nodeEntry && (nodeEntry[1] as any).is_dir === 1) {
+        // Load from tree data instead of file system
+        loadFolderFromTree(nodeEntry[0]);
+        return;
+      }
+    }
+    
+    // Fallback to original file system navigation
     setCurrentPath(path);
-  }, [isSearching]);
+  }, [isSearching, treeData, loadFolderFromTree]);
 
   const handleItemSelect = useCallback((path: string, isMultiSelect = false, isRangeSelect = false) => {
     setSelectedItems(prev => {
@@ -80,6 +161,7 @@ export const FileExplorer: React.FC = () => {
 
   const handleItemDoubleClick = useCallback((item: FileSystemItem) => {
     if (item.type === 'folder') {
+      // Try to navigate using tree data first, then fallback to file system
       handleNavigate(item.path);
     } else {
       // Open file in system default application
@@ -338,6 +420,28 @@ export const FileExplorer: React.FC = () => {
           currentPath={currentPath}
           onNavigate={handleNavigate}
         />
+
+        {/* TreeView Panel */}
+        <div className="w-80 border-r border-gray-200 bg-white">
+          <TreeView 
+            onNodeSelect={(node) => {
+              console.log('Selected node:', node.name);
+              // For folders, load contents immediately on single click
+              if (node.is_dir === 1) {
+                loadFolderFromTree(node.id);
+              }
+            }}
+            onNodeDoubleClick={(node) => {
+              // Double-click behavior: load folder contents (same as single click for now)
+              if (node.is_dir === 1) {
+                loadFolderFromTree(node.id);
+              } else {
+                // For files, you could add "open file" functionality here
+                console.log('Double-clicked file:', node.name);
+              }
+            }}
+          />
+        </div>
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col min-w-0">
