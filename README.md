@@ -1,4 +1,5 @@
-# Clarity: By JP Benavides Cruzatte, Anthony Lamelas, Sohan Sondhi
+# Clarity
+Created By: JP Benavides Cruzatte, Anthony Lamelas, Sohan Sondhi
 
 Clarity is a cross-platform application for scraping, indexing, searching, and managing files and images using LanceDB and modern AI models.
 
