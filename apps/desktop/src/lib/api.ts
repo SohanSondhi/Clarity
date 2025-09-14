@@ -207,6 +207,39 @@ class FileExplorerAPI {
     }
   }
 
+  async runIndex(rootDir: string, options?: { dbPath?: string; tableName?: string; outputPath?: string }): Promise<any> {
+    const body: any = { root_dir: rootDir };
+    if (options?.dbPath) body.db_path = options.dbPath;
+    if (options?.tableName) body.table_name = options.tableName;
+    if (options?.outputPath) body.output_path = options.outputPath;
+    const response = await fetch(`${this.baseUrl}/index`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+      const msg = await response.text();
+      throw new Error(`Index failed: ${response.status} ${msg}`);
+    }
+    return response.json();
+  }
+
+  async clearAll(options?: { dbPath?: string; outputPath?: string }): Promise<boolean> {
+    const body: any = {};
+    if (options?.dbPath) body.db_path = options.dbPath;
+    if (options?.outputPath) body.output_path = options.outputPath;
+    const response = await fetch(`${this.baseUrl}/clear`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+      const msg = await response.text();
+      throw new Error(`Clear failed: ${response.status} ${msg}`);
+    }
+    return true;
+  }
+
 
   async renameItem(oldPath: string, newName: string): Promise<boolean> {
     try {

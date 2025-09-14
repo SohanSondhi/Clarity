@@ -18,6 +18,8 @@ export const FileExplorer: React.FC = () => {
   const [searchResults, setSearchResults] = useState<SearchResult | null>(null);
   const [clipboard, setClipboard] = useState<{ items: string[], operation: 'copy' | 'cut' } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isIndexing, setIsIndexing] = useState(false);
+  const [indexLogs, setIndexLogs] = useState<string[]>([]);
   const [treeData, setTreeData] = useState<any>(null);
   const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
   const [renamingItem, setRenamingItem] = useState<string | null>(null);
@@ -414,6 +416,48 @@ export const FileExplorer: React.FC = () => {
     doRefresh();
   };
 
+  const handleRunIndex = async (rootDir: string) => {
+    const dir = rootDir.trim();
+    if (!dir) return;
+    setLoading(true);
+    setIsIndexing(true);
+    setIndexLogs([]);
+    try {
+      // Use passed-in directory; do not rely on env defaults
+      const newTree = await fileAPI.runIndex(dir);
+      setTreeData(newTree);
+      if (Array.isArray(newTree?.index_logs)) {
+        setIndexLogs(newTree.index_logs);
+      }
+      // Load first root after reindex
+      if (newTree?.root_ids?.length) {
+        loadFolderFromTree(newTree.root_ids[0]);
+      }
+      toast({ title: 'Index complete', description: `Indexed: ${dir}` });
+    } catch (e: any) {
+      toast({ title: 'Index failed', description: e?.message || 'Unknown error', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+      setIsIndexing(false);
+    }
+  };
+
+  const handleClearAll = async () => {
+    setLoading(true);
+    try {
+      await fileAPI.clearAll();
+      // Clear UI state
+      setTreeData(null);
+      setCurrentNodeId(null);
+      setItems([]);
+      toast({ title: 'Cleared', description: 'Database and tree file removed' });
+    } catch (e: any) {
+      toast({ title: 'Clear failed', description: e?.message || 'Unknown error', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Keyboard shortcuts (copy/paste removed)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -472,6 +516,28 @@ export const FileExplorer: React.FC = () => {
   return (
     <FluentProvider theme={webLightTheme}>
       <div className="flex h-screen bg-background text-foreground">
+        {/* Indexing overlay */}
+        {isIndexing && (
+          <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center">
+            <div className="bg-white rounded shadow-lg p-4 w-[520px] max-h-[70vh] flex flex-col">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 animate-spin border-2 border-gray-300 border-t-blue-600 rounded-full" />
+                  <span className="font-medium">Indexing in progress…</span>
+                </div>
+              </div>
+              <div className="text-xs text-gray-600 border rounded p-2 bg-gray-50 overflow-auto" style={{ minHeight: 180 }}>
+                {indexLogs.length === 0 ? (
+                  <div>Starting…</div>
+                ) : (
+                  indexLogs.map((l, i) => (
+                    <div key={i} className="whitespace-pre-wrap break-all">{l}</div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        )}
         {/* TreeView Panel */}
         <div className="w-80 border-r border-gray-200 bg-white">
           <TreeView 
@@ -509,6 +575,8 @@ export const FileExplorer: React.FC = () => {
             }}
             onDelete={handleDelete}
             onRefresh={handleRefresh}
+            onRunIndex={handleRunIndex}
+            onClearAll={handleClearAll}
           />
 
           {/* Create Folder Dialog */}

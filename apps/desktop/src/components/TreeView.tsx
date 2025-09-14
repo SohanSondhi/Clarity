@@ -54,16 +54,29 @@ export const TreeView: React.FC<TreeViewProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Load tree data
+  // Load tree data or clear when parent passes null
   useEffect(() => {
-    // If parent provides data, use it and skip fetching
-    if (data) {
+    // Parent explicitly provided data
+    if (data && typeof data === 'object') {
       setTreeData(data);
       setExpandedNodes(new Set(data.root_ids));
+      setSelectedNode(null);
+      setError(null);
       setLoading(false);
       return;
     }
 
+    // Parent explicitly cleared data -> reset local state and do not fetch
+    if (data === null) {
+      setTreeData(null);
+      setExpandedNodes(new Set());
+      setSelectedNode(null);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+
+    // Uncontrolled mode: fetch from backend
     const loadTreeData = async () => {
       try {
         const response = await fetch('http://127.0.0.1:8001/tree');

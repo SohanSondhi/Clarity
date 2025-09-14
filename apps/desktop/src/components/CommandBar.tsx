@@ -20,6 +20,8 @@ interface CommandBarProps {
   onRename: () => void;
   onDelete: () => void;
   onRefresh: () => void;
+  onRunIndex: (rootDir: string) => void;
+  onClearAll: () => void;
   onShare?: () => void;
 }
 
@@ -29,10 +31,13 @@ export const CommandBar: React.FC<CommandBarProps> = ({
   onRename,
   onDelete,
   onRefresh,
+  onRunIndex,
+  onClearAll,
   onShare
 }) => {
   const hasSelection = selectedItems.length > 0;
   const hasMultipleSelection = selectedItems.length > 1;
+  const [sourceDir, setSourceDir] = React.useState('');
 
   return (
     <div className="bg-explorer-header border-b border-border px-3 py-2">
@@ -82,6 +87,24 @@ export const CommandBar: React.FC<CommandBarProps> = ({
             Refresh
           </ToolbarButton>
         </Tooltip>
+
+        <div className="w-px h-6 bg-border mx-2" />
+
+        <div className="flex items-center gap-2">
+          <input
+            className="border border-border rounded px-2 py-1 text-sm"
+            style={{ width: 280 }}
+            placeholder="Source directory (e.g., C:/Users/Me/Documents)"
+            value={sourceDir}
+            onChange={(e) => setSourceDir(e.target.value)}
+          />
+          <Button appearance="primary" onClick={() => onRunIndex(sourceDir)} disabled={!sourceDir.trim()}>
+            Run Index
+          </Button>
+          <Button appearance="secondary" onClick={onClearAll}>
+            Clear
+          </Button>
+        </div>
         
         {onShare && (
           <>

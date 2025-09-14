@@ -7,8 +7,6 @@ from FileScraper import LanceDBManager
 db_path = "C:/Professional/test-db"
 print(f"Connecting to database at: {os.path.abspath(db_path)}")
 
-
-
 # Check what tables exist
 print(f"Available tables: {db.table_names()}")
 
