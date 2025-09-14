@@ -154,3 +154,9 @@ dmypy.json
 chroma_store/
 
 file_tree.json
+
+# xwiki
+# Ensure Windows-style paths are ignored using forward slashes
+apps/desktop/resources/python-backend/clarity-api/_internal/
+
+apps/desktop/resources/python-backend/

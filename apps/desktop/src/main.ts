@@ -24,7 +24,13 @@ async function startPythonBackend(): Promise<void> {
       console.log('Starting Python backend from executable:', exePath)
       pythonProcess = spawn(exePath, [], {
         cwd: pythonBackendPath,
-        stdio: 'pipe'
+        stdio: 'pipe',
+        env: { 
+          ...process.env,
+          PYTHONWARNINGS: 'ignore',
+          HF_HUB_DISABLE_TELEMETRY: '1',
+          TRANSFORMERS_VERBOSITY: 'error'
+        }
       })
     } else {
       // Fallback to running from source
@@ -36,7 +42,13 @@ async function startPythonBackend(): Promise<void> {
         pythonProcess = spawn('python', ['-m', 'clarity_api.main'], {
           cwd: srcPath,
           stdio: 'pipe',
-          env: { ...process.env, PYTHONPATH: srcPath }
+          env: { 
+            ...process.env, 
+            PYTHONPATH: srcPath,
+            PYTHONWARNINGS: 'ignore',
+            HF_HUB_DISABLE_TELEMETRY: '1',
+            TRANSFORMERS_VERBOSITY: 'error'
+          }
         })
       } else {
         console.warn('Python backend not found, app will use mock data')
@@ -120,7 +132,8 @@ function createWindow(): void {
   if (process.env.NODE_ENV === 'development' && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
-    mainWindow.loadFile(join(__dirname, '../index.html'))
+    // In production, renderer HTML is emitted to out/renderer/index.html
+    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
 }
 

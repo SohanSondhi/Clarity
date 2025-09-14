@@ -1,16 +1,25 @@
-# To run the frontend
+# Requirements
+Python
+Npm
+
+
+# Run frontend
 cd apps/desktop
 npm install ; npm run dev
 
-# To run backend
-# Activate the virtual environment
+# Run backend
+python -m venv venv
 venv\Scripts\activate
-
-# Navigate to the API source directory  
+pip install -r requirements.txt
 cd apps\api\src
-
-# Run the API as a module
 python -m clarity_api.app
 
+
+# Run Tests
+
+
+
 # To get an executable
-npm run build:python
+cd apps\desktop
+npm install
+npm run build:win
