@@ -214,14 +214,12 @@ class LanceDBManager():
                     if os.path.splitext(filename)[1].lower() in ('.png', '.jpg', '.jpeg'):
                         is_image = True   
                         embeddings, summary = summarizer.summarize_image(file_path)
-                        print(f"Inserted data for {file_path} into table '{image_table_name}'")
                     else:
                         text_chunks = scraper.text_scrape()
                         if not text_chunks:
                             print(f"Skipping {file_path}: No text chunks returned.")
                             continue
                         embeddings, summary = summarizer.summarize_text(text_chunks)
-
                     file_stats = os.stat(file_path)
                     file_type = os.path.splitext(filename)[1].lower()
                     json_entry = {
