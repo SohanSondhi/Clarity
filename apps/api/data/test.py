@@ -1,10 +1,10 @@
 from FileScraper import LanceDBManager
 
 # Connect to your database with correct path
-db_path = "/Users/jean-pierrebenavidescruzatte/Clarity/test-folder"
+db_path = "apps/api/data/clarity_db"
 db = LanceDBManager(db_path)
 
-db.local_scrape("text", "images", "/Users/jean-pierrebenavidescruzatte/CompArchHW")
+db.local_scrape("text", "images", "apps/api/data/testdata")
 lancedb = db.get_db()
 # Check what tables exist
 print(f"Available tables: {lancedb.table_names()}")
