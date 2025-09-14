@@ -11,6 +11,8 @@ import pandas as pd
 import pyarrow as pa
 from sklearn.metrics.pairwise import cosine_similarity
 
+db = lancedb.connect("C:/Professional/test-db")
+
 #File Scraper class
 class FileScraper:
     def __init__(self, file_path):
@@ -75,6 +77,7 @@ class FileScraper:
                     return self.chunk_text(file.read())
             else: 
                 print(f"Unsupported file type: {file_extension}")
+                return []  # Return empty list for unsupported files
 
 
 #Text Summarization and Tagging 
@@ -103,37 +106,6 @@ class Summarizer:
 class LanceDBManager(): 
     def __init__(self, db_path):
         self.db = lancedb.connect(db_path)
-    
-    def add_data(self, table_name, file_path):   
-        if table_name in self.db.table_names():
-            scraper = FileScraper(file_path)
-            text_chunks = scraper.scrape()
-            if not text_chunks:
-                print(f"Skipping {file_path}: No text chunks returned.")
-                return
-            summarizer = Summarizer()
-            summary, embeddings, similarities = summarizer.summarize(text_chunks)
-            file_stats = os.stat(file_path)
-            parent_path = os.path.dirname(file_path)
-            filename = os.path.basename(file_path)
-            file_type = os.path.splitext(filename)[1].lower()
-            json_entry = {
-                "Path": file_path,
-                "Parent": parent_path,
-                "Vector": embeddings.tolist(),  # Convert numpy array to list
-                "Similarities": similarities.tolist(),  # Convert numpy array to list
-                "Name": filename,
-                "When_Created": float(file_stats.st_ctime),
-                "When_Last_Modified": float(file_stats.st_mtime),
-                "Description": summary,
-                "File_type": file_type
-            }
-            self.db.insert(table_name, [json_entry])
-        else:
-            raise ValueError(f"Table {table_name} does not exist in the database.")  
-
-        
-    
 
     def create_table(self, table_name, data):
         schema = pa.schema([
@@ -158,11 +130,7 @@ class LanceDBManager():
             raise ValueError(f"Table {table_name} does not exist in the database.")
         
     def local_scrape(self, table_name, root_dir):
-        is_mac = os.name != 'nt'
-        exclude_dirs = {
-            '/System', '/Library', '/private', '/dev', '/Volumes', '/Applications', '/usr', '/bin', '/sbin', '/etc', '/proc', '/tmp',
-            'C:\\Windows', 'C:\\Program Files', 'C:\\Program Files (x86)', 'C:\\Users\\All Users', 'C:\\ProgramData'
-        }
+        exclude_dirs = {'/System', '/Library', '/private', '/dev', '/Volumes', '/Applications', '/usr', '/bin', '/sbin', '/etc', '/proc', '/tmp'}
         seen_files = set()
         summarizer = Summarizer()
         data = []
@@ -171,7 +139,7 @@ class LanceDBManager():
             dirnames[:] = [d for d in dirnames if os.path.join(dirpath, d) not in exclude_dirs]
             for filename in filenames:
                 parent_path = os.path.abspath(dirpath)
-                file_id = os.path.join(parent_path, filename)
+                file_id = f"{parent_path}/{filename}"
                 if file_id in seen_files:
                     print(f"Skipping already seen file: {file_id}")
                     continue  
@@ -189,8 +157,8 @@ class LanceDBManager():
                     json_entry = {
                         "Path": file_path,
                         "Parent": parent_path,
-                        "Vector": embeddings.tolist(),
-                        "Similarities": similarities.tolist(),
+                        "Vector": embeddings.tolist(),  # Convert numpy array to list
+                        "Similarities": similarities.tolist(),  # Convert numpy array to list
                         "Name": filename,
                         "When_Created": float(file_stats.st_ctime),
                         "When_Last_Modified": float(file_stats.st_mtime),
@@ -203,3 +171,15 @@ class LanceDBManager():
                     print(f"Error processing {file_path}: {e}")
         if len(data) > 0:  
             self.create_table(table_name, data)
+            
+        
+if __name__ == "__main__":
+    ROOT_DIR = "C:/Professional"
+    DB_PATH = "C:/Professional/test-db"
+    TABLE_NAME = "Hello"
+
+    # Initialize LanceDB manager
+    db_manager = LanceDBManager(DB_PATH)
+
+    # Scrape local files and populate the database
+    db_manager.local_scrape(TABLE_NAME, ROOT_DIR)
