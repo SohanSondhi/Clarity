@@ -1,0 +1,254 @@
+{
+  "nodes": {
+    "8d6095a666c371a003417bc3edbf2b0f": {
+      "id": "8d6095a666c371a003417bc3edbf2b0f",
+      "path_abs": "C:",
+      "parent_id": null,
+      "name": "C:",
+      "is_dir": 1,
+      "ext": "",
+      "size_bytes": null,
+      "when_created": null,
+      "when_modified": null,
+      "is_synthetic": true
+    },
+    "7b1966e6e112e51e41ea1c4221af246f": {
+      "id": "7b1966e6e112e51e41ea1c4221af246f",
+      "path_abs": "C:|Professional",
+      "parent_id": "8d6095a666c371a003417bc3edbf2b0f",
+      "name": "Professional",
+      "is_dir": 1,
+      "ext": "",
+      "size_bytes": null,
+      "when_created": null,
+      "when_modified": null,
+      "is_synthetic": true
+    },
+    "4132c040cb4b4c7373433a5fd65711f6": {
+      "id": "4132c040cb4b4c7373433a5fd65711f6",
+      "path_abs": "C:|Professional|BVT_Prep",
+      "parent_id": "7b1966e6e112e51e41ea1c4221af246f",
+      "name": "BVT_Prep",
+      "is_dir": 1,
+      "ext": "",
+      "size_bytes": null,
+      "when_created": null,
+      "when_modified": null,
+      "is_synthetic": true
+    },
+    "61bf7b0807d22dceaa2bb84898b944f4": {
+      "id": "61bf7b0807d22dceaa2bb84898b944f4",
+      "path_abs": "C:|Professional|August_Resume_AnthonyLamelas.pdf",
+      "parent_id": "7b1966e6e112e51e41ea1c4221af246f",
+      "name": "August_Resume_AnthonyLamelas.pdf",
+      "is_dir": 0,
+      "ext": "pdf",
+      "size_bytes": null,
+      "when_created": 1755647208.429595,
+      "when_modified": 1755647208.5621774,
+      "is_synthetic": false
+    },
+    "34ecf8e6c15c7b9d8280d2bc9d71233f": {
+      "id": "34ecf8e6c15c7b9d8280d2bc9d71233f",
+      "path_abs": "C:|Professional|August_Resume_AnthonyLamelas_26.pdf",
+      "parent_id": "7b1966e6e112e51e41ea1c4221af246f",
+      "name": "August_Resume_AnthonyLamelas_26.pdf",
+      "is_dir": 0,
+      "ext": "pdf",
+      "size_bytes": null,
+      "when_created": 1755454582.5125928,
+      "when_modified": 1755810974.893424,
+      "is_synthetic": false
+    },
+    "c930d7c59df154b7baaea6d6f76e4964": {
+      "id": "c930d7c59df154b7baaea6d6f76e4964",
+      "path_abs": "C:|Professional|Cover_Letter_Anthony_Lamelas.pdf",
+      "parent_id": "7b1966e6e112e51e41ea1c4221af246f",
+      "name": "Cover_Letter_Anthony_Lamelas.pdf",
+      "is_dir": 0,
+      "ext": "pdf",
+      "size_bytes": null,
+      "when_created": 1752381886.594382,
+      "when_modified": 1752381886.71152,
+      "is_synthetic": false
+    },
+    "46a03c086c7bcc40db85bf9ad71fd5db": {
+      "id": "46a03c086c7bcc40db85bf9ad71fd5db",
+      "path_abs": "C:|Professional|BVT_Prep|Hedge.py",
+      "parent_id": "4132c040cb4b4c7373433a5fd65711f6",
+      "name": "Hedge.py",
+      "is_dir": 0,
+      "ext": "py",
+      "size_bytes": null,
+      "when_created": 1757284762.5011506,
+      "when_modified": 1757290359.4615736,
+      "is_synthetic": false
+    },
+    "692eff79fd228431c8c03cc0f7508f43": {
+      "id": "692eff79fd228431c8c03cc0f7508f43",
+      "path_abs": "C:|Professional|BVT_Prep|Hedge_opt.py",
+      "parent_id": "4132c040cb4b4c7373433a5fd65711f6",
+      "name": "Hedge_opt.py",
+      "is_dir": 0,
+      "ext": "py",
+      "size_bytes": null,
+      "when_created": 1757290387.5476108,
+      "when_modified": 1757689765.9744532,
+      "is_synthetic": false
+    },
+    "8f7348036f5833646485064c50ce91e5": {
+      "id": "8f7348036f5833646485064c50ce91e5",
+      "path_abs": "C:|Professional|BVT_Prep|Hedge_prac.py",
+      "parent_id": "4132c040cb4b4c7373433a5fd65711f6",
+      "name": "Hedge_prac.py",
+      "is_dir": 0,
+      "ext": "py",
+      "size_bytes": null,
+      "when_created": 1757686005.3191066,
+      "when_modified": 1757689887.4986093,
+      "is_synthetic": false
+    },
+    "11e2058691e38a85b384bea3ae41ea35": {
+      "id": "11e2058691e38a85b384bea3ae41ea35",
+      "path_abs": "C:|Professional|BVT_Prep|Manufacturing.py",
+      "parent_id": "4132c040cb4b4c7373433a5fd65711f6",
+      "name": "Manufacturing.py",
+      "is_dir": 0,
+      "ext": "py",
+      "size_bytes": null,
+      "when_created": 1757277689.607525,
+      "when_modified": 1757686336.8002212,
+      "is_synthetic": false
+    },
+    "060ceefc8559fba5607da27b0e051be9": {
+      "id": "060ceefc8559fba5607da27b0e051be9",
+      "path_abs": "C:|Professional|BVT_Prep|Manufacturing_opt.py",
+      "parent_id": "4132c040cb4b4c7373433a5fd65711f6",
+      "name": "Manufacturing_opt.py",
+      "is_dir": 0,
+      "ext": "py",
+      "size_bytes": null,
+      "when_created": 1757281335.5513384,
+      "when_modified": 1757282001.898355,
+      "is_synthetic": false
+    },
+    "ae779d515352a6dcd079bf7818a4b43a": {
+      "id": "ae779d515352a6dcd079bf7818a4b43a",
+      "path_abs": "C:|Professional|BVT_Prep|Manufacturing_prac.py",
+      "parent_id": "4132c040cb4b4c7373433a5fd65711f6",
+      "name": "Manufacturing_prac.py",
+      "is_dir": 0,
+      "ext": "py",
+      "size_bytes": null,
+      "when_created": 1757686000.3516443,
+      "when_modified": 1757686503.9707968,
+      "is_synthetic": false
+    },
+    "3c7e18f8f2e09cc1ca9644fa78572ce7": {
+      "id": "3c7e18f8f2e09cc1ca9644fa78572ce7",
+      "path_abs": "C:|Professional|BVT_Prep|WMA.opt.py",
+      "parent_id": "4132c040cb4b4c7373433a5fd65711f6",
+      "name": "WMA.opt.py",
+      "is_dir": 0,
+      "ext": "py",
+      "size_bytes": null,
+      "when_created": 1757280473.4504695,
+      "when_modified": 1757280806.0773594,
+      "is_synthetic": false
+    },
+    "6fce7c61079ce923f361a3594865317e": {
+      "id": "6fce7c61079ce923f361a3594865317e",
+      "path_abs": "C:|Professional|BVT_Prep|WMA.py",
+      "parent_id": "4132c040cb4b4c7373433a5fd65711f6",
+      "name": "WMA.py",
+      "is_dir": 0,
+      "ext": "py",
+      "size_bytes": null,
+      "when_created": 1757276785.7207048,
+      "when_modified": 1757277327.1946678,
+      "is_synthetic": false
+    },
+    "3841d29be82ebba6250a574dd4f9ab4b": {
+      "id": "3841d29be82ebba6250a574dd4f9ab4b",
+      "path_abs": "C:|Professional|BVT_Prep|WMA_prac.py",
+      "parent_id": "4132c040cb4b4c7373433a5fd65711f6",
+      "name": "WMA_prac.py",
+      "is_dir": 0,
+      "ext": "py",
+      "size_bytes": null,
+      "when_created": 1757685987.3760233,
+      "when_modified": 1757686319.2786524,
+      "is_synthetic": false
+    },
+    "6d5ae28d074d6c91a52cb85555205281": {
+      "id": "6d5ae28d074d6c91a52cb85555205281",
+      "path_abs": "C:|Professional|Test_44",
+      "parent_id": "7b1966e6e112e51e41ea1c4221af246f",
+      "name": "Test_44",
+      "is_dir": 1,
+      "ext": "",
+      "size_bytes": null,
+      "when_created": 1757821085.6468534,
+      "when_modified": 1757821085.6468534,
+      "is_synthetic": false
+    },
+    "601159e05765a22177c445c48c6c3729": {
+      "id": "601159e05765a22177c445c48c6c3729",
+      "path_abs": "C:|Professional|bobby",
+      "parent_id": "7b1966e6e112e51e41ea1c4221af246f",
+      "name": "bobby",
+      "is_dir": 1,
+      "ext": "",
+      "size_bytes": null,
+      "when_created": 1757821138.0710182,
+      "when_modified": 1757821138.0710182,
+      "is_synthetic": false
+    },
+    "3c30dc5cf9dc165b6d43f6ed000ff38c": {
+      "id": "3c30dc5cf9dc165b6d43f6ed000ff38c",
+      "path_abs": "C:|Professional|TEsty",
+      "parent_id": "7b1966e6e112e51e41ea1c4221af246f",
+      "name": "TEsty",
+      "is_dir": 1,
+      "ext": "",
+      "size_bytes": null,
+      "when_created": 1757821315.6714144,
+      "when_modified": 1757821315.6714144,
+      "is_synthetic": false
+    }
+  },
+  "adjacency_list": {
+    "8d6095a666c371a003417bc3edbf2b0f": [
+      "7b1966e6e112e51e41ea1c4221af246f"
+    ],
+    "7b1966e6e112e51e41ea1c4221af246f": [
+      "601159e05765a22177c445c48c6c3729",
+      "4132c040cb4b4c7373433a5fd65711f6",
+      "6d5ae28d074d6c91a52cb85555205281",
+      "3c30dc5cf9dc165b6d43f6ed000ff38c",
+      "61bf7b0807d22dceaa2bb84898b944f4",
+      "34ecf8e6c15c7b9d8280d2bc9d71233f",
+      "c930d7c59df154b7baaea6d6f76e4964"
+    ],
+    "4132c040cb4b4c7373433a5fd65711f6": [
+      "46a03c086c7bcc40db85bf9ad71fd5db",
+      "692eff79fd228431c8c03cc0f7508f43",
+      "8f7348036f5833646485064c50ce91e5",
+      "11e2058691e38a85b384bea3ae41ea35",
+      "060ceefc8559fba5607da27b0e051be9",
+      "ae779d515352a6dcd079bf7818a4b43a",
+      "3c7e18f8f2e09cc1ca9644fa78572ce7",
+      "6fce7c61079ce923f361a3594865317e",
+      "3841d29be82ebba6250a574dd4f9ab4b"
+    ]
+  },
+  "root_ids": [
+    "8d6095a666c371a003417bc3edbf2b0f"
+  ],
+  "metadata": {
+    "total_nodes": 18,
+    "total_files": 12,
+    "total_directories": 6,
+    "synthetic_directories": 3
+  }
+}

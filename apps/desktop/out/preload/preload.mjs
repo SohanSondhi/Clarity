@@ -1,6 +1,6 @@
-import { contextBridge } from "electron";
+import { contextBridge, ipcRenderer } from "electron";
 const api = {
-  // Add any custom APIs here
+  openPath: (path) => ipcRenderer.invoke("open-path", path)
 };
 const electronAPI = {
   platform: process.platform

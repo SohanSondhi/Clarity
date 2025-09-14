@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow } from 'electron'
+import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { spawn, ChildProcess } from 'child_process'
 import { existsSync } from 'fs'
@@ -147,3 +147,13 @@ app.on('before-quit', () => {
 
 // In this file you can include the rest of your app"s main process
 // code. You can also put them in separate files and require them here.
+
+// IPC to open a file or folder using the OS default handler
+ipcMain.handle('open-path', async (_event, path: string) => {
+  try {
+    await shell.openPath(path)
+    return { success: true }
+  } catch (e: any) {
+    return { success: false, error: String(e) }
+  }
+})

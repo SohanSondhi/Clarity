@@ -35,7 +35,7 @@ export interface SearchResult {
 }
 
 class FileExplorerAPI {
-  private baseUrl = 'http://127.0.0.1:8000';
+  private baseUrl = 'http://127.0.0.1:8001';
 
   // Mock data for development
   private mockFiles: FileSystemItem[] = [
@@ -127,36 +127,9 @@ class FileExplorerAPI {
   ];
 
   async getDirectoryContents(path: string): Promise<FileSystemItem[]> {
-    try {
-      const response = await fetch(`${this.baseUrl}/directory`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ path }),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      // Convert date strings back to Date objects
-      return data.map((item: any) => ({
-        ...item,
-        dateModified: new Date(item.dateModified)
-      }));
-      
-    } catch (error) {
-      console.warn('API not available, using mock data:', error);
-      // Return mock data filtered by path
-      return this.mockFiles.filter(item => 
-        item.path.startsWith(path) && 
-        item.path !== path &&
-        !item.path.substring(path.length + 1).includes('/')
-      );
-    }
+    // Right pane mirrors the indexed tree; we don't call a backend directory API.
+    // Return empty here; the component populates from tree data when available.
+    return [];
   }
 
   async searchFiles(query: string): Promise<SearchResult> {
@@ -190,49 +163,30 @@ class FileExplorerAPI {
   }
 
   async getQuickAccessItems(): Promise<QuickAccessItem[]> {
-    try {
-      const response = await fetch(`${this.baseUrl}/quick-access`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      return await response.json();
-    } catch (error) {
-      console.warn('Quick access API not available, using mock data:', error);
-      return this.mockQuickAccess;
-    }
+    // Not used yet – return empty to avoid calling backend
+    return [];
   }
 
   async getDrives(): Promise<DriveInfo[]> {
-    try {
-      const response = await fetch(`${this.baseUrl}/drives`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      return await response.json();
-    } catch (error) {
-      console.warn('Drives API not available, using mock data:', error);
-      return this.mockDrives;
-    }
+    // Not used yet – return empty to avoid calling backend
+    return [];
   }
 
   async createFolder(path: string, name: string): Promise<boolean> {
     try {
+      // Convert parent path to '|' delimiter format for backend
+      const parent_path = path.replace(/\//g, '|');
       const response = await fetch(`${this.baseUrl}/create-folder`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ path, name }),
+        body: JSON.stringify({ parent_path, name }),
       });
-      
       return response.ok;
     } catch (error) {
-      console.warn('Create folder API not available, simulating success:', error);
-      return true;
+      console.error('Create folder API error:', error);
+      return false;
     }
   }
 
@@ -253,17 +207,32 @@ class FileExplorerAPI {
     }
   }
 
+
   async renameItem(oldPath: string, newName: string): Promise<boolean> {
     try {
+      // Convert path from frontend format (/) to API format (|)
+      const normalizedPath = oldPath.replace(/\//g, '|');
+      
       const response = await fetch(`${this.baseUrl}/rename`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ oldPath, newName }),
+        body: JSON.stringify({ 
+          old_path: normalizedPath, 
+          new_name: newName 
+        }),
       });
       
-      return response.ok;
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Rename successful:', result);
+        return true;
+      } else {
+        const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
+        console.error('Rename failed:', error);
+        return false;
+      }
     } catch (error) {
       console.warn('Rename API not available, simulating success:', error);
       return true;

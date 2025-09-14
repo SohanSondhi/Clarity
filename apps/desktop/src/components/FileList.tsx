@@ -31,7 +31,9 @@ interface FileListProps {
   onItemSelect: (path: string, isMultiSelect?: boolean, isRangeSelect?: boolean) => void;
   onItemDoubleClick: (item: FileSystemItem) => void;
   onSort: (field: keyof FileSystemItem) => void;
-  onRename: (item: FileSystemItem) => void;
+  onRename: (oldPath: string, newName: string) => void;
+  renamingItem?: string; // Path of item currently being renamed
+  onStartRename?: (path: string) => void; // Callback to start rename mode
 }
 
 type SortableField = 'name' | 'dateModified' | 'type' | 'size';
@@ -77,16 +79,25 @@ interface ItemRowProps {
     selectedItems: string[];
     onItemSelect: (path: string, isMultiSelect?: boolean, isRangeSelect?: boolean) => void;
     onItemDoubleClick: (item: FileSystemItem) => void;
-    onRename: (item: FileSystemItem) => void;
+    onRename: (oldPath: string, newName: string) => void;
+    renamingItem?: string;
+    onStartRename?: (path: string) => void;
   };
 }
 
 const ItemRow: React.FC<ItemRowProps> = ({ index, style, data }) => {
-  const { items, selectedItems, onItemSelect, onItemDoubleClick, onRename } = data;
+  const { items, selectedItems, onItemSelect, onItemDoubleClick, onRename, renamingItem, onStartRename } = data;
   const item = items[index];
   const isSelected = selectedItems.includes(item.path);
-  const [renaming, setRenaming] = useState(false);
+  const isRenaming = renamingItem === item.path;
   const [renameName, setRenameName] = useState(item.name);
+
+  // Update rename name when item changes or rename starts
+  useEffect(() => {
+    if (isRenaming) {
+      setRenameName(item.name);
+    }
+  }, [isRenaming, item.name]);
 
   const handleClick = (e: React.MouseEvent) => {
     const isCtrl = e.ctrlKey || e.metaKey;
@@ -98,21 +109,33 @@ const ItemRow: React.FC<ItemRowProps> = ({ index, style, data }) => {
     onItemDoubleClick(item);
   };
 
-  const handleRename = () => {
-    setRenaming(true);
-    setRenameName(item.name);
+  const handleOpen = () => {
+    // Single-click open behavior
+    if (item.type === 'folder') {
+      onItemDoubleClick(item);
+    } else {
+      // Open file with system default application via Electron
+      const fullPath = item.path.replace(/\//g, '\\');
+      // @ts-ignore - exposed in preload
+      window.api?.openPath?.(fullPath);
+    }
   };
 
+
   const handleRenameSubmit = () => {
-    if (renameName !== item.name) {
-      onRename({ ...item, name: renameName });
+    if (renameName !== item.name && renameName.trim()) {
+      onRename(item.path, renameName);
     }
-    setRenaming(false);
+    if (onStartRename) {
+      onStartRename(''); // Clear renaming state
+    }
   };
 
   const handleRenameCancel = () => {
-    setRenaming(false);
     setRenameName(item.name);
+    if (onStartRename) {
+      onStartRename(''); // Clear renaming state
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -148,8 +171,9 @@ const ItemRow: React.FC<ItemRowProps> = ({ index, style, data }) => {
       className={`flex items-center px-3 py-1 border-b border-explorer-grid cursor-pointer hover:bg-explorer-item-hover ${
         isSelected ? 'bg-explorer-item-selected' : ''
       }`}
-      onClick={handleClick}
+      onClick={handleOpen}
       onDoubleClick={handleDoubleClick}
+      onDoubleClickCapture={(e) => e.preventDefault()}
       onContextMenu={(e) => {
         e.preventDefault();
         // TODO: Show context menu
@@ -158,7 +182,10 @@ const ItemRow: React.FC<ItemRowProps> = ({ index, style, data }) => {
       <div className="w-6 flex justify-center mr-3">
         <Checkbox
           checked={isSelected}
-          onChange={() => onItemSelect(item.path)}
+          onChange={(e) => {
+            e.stopPropagation();
+            onItemSelect(item.path, false, false); // Single select when clicking checkbox
+          }}
         />
       </div>
       
@@ -167,7 +194,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ index, style, data }) => {
           {getFileIcon(item)}
         </div>
         <div className="min-w-0 flex-1 mr-6">
-          {renaming ? (
+          {isRenaming ? (
             <input
               type="text"
               value={renameName}
@@ -179,7 +206,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ index, style, data }) => {
               onClick={(e) => e.stopPropagation()}
             />
           ) : (
-            <span className="text-sm truncate block">{item.name}</span>
+            <span className="text-sm truncate block" onClick={(e) => { e.stopPropagation(); handleOpen(); }}>{item.name}</span>
           )}
         </div>
       </div>
@@ -207,7 +234,9 @@ export const FileList: React.FC<FileListProps> = ({
   onItemSelect,
   onItemDoubleClick,
   onSort,
-  onRename
+  onRename,
+  renamingItem,
+  onStartRename
 }) => {
   const [listHeight, setListHeight] = useState(400);
 
@@ -261,7 +290,9 @@ export const FileList: React.FC<FileListProps> = ({
     selectedItems,
     onItemSelect,
     onItemDoubleClick,
-    onRename
+    onRename,
+    renamingItem,
+    onStartRename
   };
 
   return (

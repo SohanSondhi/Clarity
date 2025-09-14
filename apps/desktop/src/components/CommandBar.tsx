@@ -7,9 +7,6 @@ import {
 } from '@fluentui/react-components';
 import {
   FolderAdd24Regular,
-  Copy24Regular,
-  ClipboardPaste24Regular,
-  Cut24Regular,
   Rename24Regular,
   Delete24Regular,
   ArrowSync24Regular,
@@ -19,11 +16,7 @@ import {
 
 interface CommandBarProps {
   selectedItems: string[];
-  canPaste: boolean;
   onNewFolder: () => void;
-  onCopy: () => void;
-  onPaste: () => void;
-  onCut: () => void;
   onRename: () => void;
   onDelete: () => void;
   onRefresh: () => void;
@@ -32,11 +25,7 @@ interface CommandBarProps {
 
 export const CommandBar: React.FC<CommandBarProps> = ({
   selectedItems,
-  canPaste,
   onNewFolder,
-  onCopy,
-  onPaste,
-  onCut,
   onRename,
   onDelete,
   onRefresh,
@@ -57,40 +46,7 @@ export const CommandBar: React.FC<CommandBarProps> = ({
         </ToolbarButton>
         
         <div className="w-px h-6 bg-border mx-2" />
-        
-        <Tooltip content="Copy selected items" relationship="label">
-          <ToolbarButton
-            appearance="subtle"
-            icon={<Copy24Regular />}
-            disabled={!hasSelection}
-            onClick={onCopy}
-          >
-            Copy
-          </ToolbarButton>
-        </Tooltip>
-        
-        <Tooltip content="Paste items from clipboard" relationship="label">
-          <ToolbarButton
-            appearance="subtle"
-            icon={<ClipboardPaste24Regular />}
-            disabled={!canPaste}
-            onClick={onPaste}
-          >
-            Paste
-          </ToolbarButton>
-        </Tooltip>
-        
-        <Tooltip content="Cut selected items" relationship="label">
-          <ToolbarButton
-            appearance="subtle"
-            icon={<Cut24Regular />}
-            disabled={!hasSelection}
-            onClick={onCut}
-          >
-            Cut
-          </ToolbarButton>
-        </Tooltip>
-        
+                
         <div className="w-px h-6 bg-border mx-2" />
         
         <Tooltip content="Rename selected item" relationship="label">

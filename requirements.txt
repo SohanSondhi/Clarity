@@ -9,3 +9,8 @@ lancedb
 pandas 
 pyarrow 
 fastapi
+chromadb>=0.4.0
+sentence-transformers
+scikit-learn
+pypdf2
+python-dotenv>=1.0.0

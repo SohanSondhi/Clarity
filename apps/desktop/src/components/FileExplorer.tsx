@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FluentProvider, webLightTheme } from '@fluentui/react-components';
-import { Sidebar } from './Sidebar';
+import { FluentProvider, webLightTheme, Dialog, DialogSurface, DialogBody, DialogTitle, DialogActions, Button, Input } from '@fluentui/react-components';
 import { CommandBar } from './CommandBar';
 import { BreadcrumbBar } from './BreadcrumbBar';
 import { FileList } from './FileList';
 import { StatusBar } from './StatusBar';
+import { TreeView } from './TreeView';
 import { FileSystemItem, fileAPI, SearchResult } from '../lib/api';
 import { useToast } from '../hooks/use-toast';
 
@@ -18,14 +18,80 @@ export const FileExplorer: React.FC = () => {
   const [searchResults, setSearchResults] = useState<SearchResult | null>(null);
   const [clipboard, setClipboard] = useState<{ items: string[], operation: 'copy' | 'cut' } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [treeData, setTreeData] = useState<any>(null);
+  const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
+  const [renamingItem, setRenamingItem] = useState<string | null>(null);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [newFolderName, setNewFolderName] = useState('');
   const { toast } = useToast();
 
   const isSearching = Boolean(searchResults);
   const displayItems = isSearching ? searchResults!.items : items;
 
+  // Convert tree node to FileSystemItem
+  const convertTreeNodeToFileSystemItem = (node: any): FileSystemItem => {
+    return {
+      name: node.name,
+      path: node.path_abs.replace(/\|/g, '/'), // Convert | back to / for display
+      type: node.is_dir === 1 ? 'folder' : 'file',
+      size: node.size_bytes || 0,
+      dateModified: node.when_modified ? new Date(node.when_modified * 1000) : new Date(),
+      extension: node.ext || undefined,
+      description: `Tree item: ${node.name}`,
+    };
+  };
+
+  // Load folder contents from tree data
+  const loadFolderFromTree = useCallback((nodeId: string) => {
+    if (!treeData) return;
+    
+    const node = treeData.nodes[nodeId];
+    if (!node) return;
+
+    // Get children from adjacency list (preserves order!)
+    const childIds = treeData.adjacency_list[nodeId] || [];
+    const childItems: FileSystemItem[] = childIds.map((childId: string) => convertTreeNodeToFileSystemItem(treeData.nodes[childId]));
+
+    // Update the file list
+    setItems(childItems);
+    setCurrentPath(node.path_abs.replace(/\|/g, '/'));
+    setCurrentNodeId(nodeId);
+    setSelectedItems([]);
+    
+    console.log(`Loaded ${childItems.length} items from tree node:`, node.name);
+  }, [treeData]);
+
   useEffect(() => {
-    loadDirectory(currentPath);
-  }, [currentPath]);
+    // Only fetch from filesystem when not viewing a tree node
+    if (!currentNodeId) {
+      loadDirectory(currentPath);
+    }
+  }, [currentPath, currentNodeId]);
+
+  // Load tree data on startup
+  useEffect(() => {
+    const loadTreeData = async () => {
+      try {
+        // Fetch from your API endpoint instead of static file
+        const response = await fetch('http://127.0.0.1:8001/tree');
+        if (response.ok) {
+          const data = await response.json();
+          setTreeData(data);
+          console.log('Tree data loaded:', data.metadata);
+        }
+      } catch (error) {
+        console.warn('Could not load tree data:', error);
+      }
+    };
+    loadTreeData();
+  }, []);
+
+  // Load root level when tree data is available
+  useEffect(() => {
+    if (treeData && treeData.root_ids && treeData.root_ids.length > 0) {
+      loadFolderFromTree(treeData.root_ids[0]);
+    }
+  }, [treeData, loadFolderFromTree]);
 
   const loadDirectory = async (path: string) => {
     setLoading(true);
@@ -50,8 +116,20 @@ export const FileExplorer: React.FC = () => {
       setSearchResults(null);
       setSearchQuery('');
     }
+    
+    // Prefer tree data for deterministic ordering and contents
+    if (treeData) {
+      const normalizedPath = path.replace(/\//g, '|');
+      const entry = Object.entries(treeData.nodes).find(([_, node]: [string, any]) => node.path_abs === normalizedPath);
+      if (entry && (entry[1] as any).is_dir === 1) {
+        loadFolderFromTree(entry[0]);
+        return;
+      }
+    }
+    // If not in tree, clear currentNodeId and fall back to FS list
+    setCurrentNodeId(null);
     setCurrentPath(path);
-  }, [isSearching]);
+  }, [isSearching, treeData, loadFolderFromTree]);
 
   const handleItemSelect = useCallback((path: string, isMultiSelect = false, isRangeSelect = false) => {
     setSelectedItems(prev => {
@@ -80,6 +158,7 @@ export const FileExplorer: React.FC = () => {
 
   const handleItemDoubleClick = useCallback((item: FileSystemItem) => {
     if (item.type === 'folder') {
+      // Try to navigate using tree data first, then fallback to file system
       handleNavigate(item.path);
     } else {
       // Open file in system default application
@@ -131,7 +210,7 @@ export const FileExplorer: React.FC = () => {
     setSelectedItems([]);
   };
 
-  const handleNewFolder = async () => {
+  const handleNewFolder = () => {
     if (isSearching) {
       toast({
         title: 'Cannot Create Folder',
@@ -140,17 +219,44 @@ export const FileExplorer: React.FC = () => {
       });
       return;
     }
+    setNewFolderName('');
+    setIsCreateDialogOpen(true);
+  };
 
-    const folderName = prompt('Enter folder name:');
+  const submitCreateFolder = async () => {
+    const folderName = newFolderName.trim();
     if (!folderName) return;
 
     try {
+      // Close immediately for instant UX
+      setIsCreateDialogOpen(false);
+      setNewFolderName('');
+
       const success = await fileAPI.createFolder(currentPath, folderName);
       if (success) {
-        await loadDirectory(currentPath);
+        try {
+          const resp = await fetch('http://127.0.0.1:8001/refresh', { method: 'POST' });
+          if (resp.ok) {
+            const newTree = await resp.json();
+            setTreeData(newTree);
+          }
+        } catch {}
+
+        if (currentNodeId && treeData) {
+          loadFolderFromTree(currentNodeId);
+        } else {
+          await loadDirectory(currentPath);
+        }
+
         toast({
           title: 'Success',
           description: `Folder "${folderName}" created successfully`
+        });
+      } else {
+        toast({
+          title: 'Error',
+          description: 'Failed to create folder',
+          variant: 'destructive'
         });
       }
     } catch (error) {
@@ -163,14 +269,7 @@ export const FileExplorer: React.FC = () => {
     }
   };
 
-  const handleCopy = () => {
-    if (selectedItems.length === 0) return;
-    setClipboard({ items: selectedItems, operation: 'copy' });
-    toast({
-      title: 'Copied',
-      description: `${selectedItems.length} item(s) copied to clipboard`
-    });
-  };
+  // Copy removed
 
   const handleCut = () => {
     if (selectedItems.length === 0) return;
@@ -181,50 +280,74 @@ export const FileExplorer: React.FC = () => {
     });
   };
 
-  const handlePaste = async () => {
-    if (!clipboard || isSearching) return;
+  // Paste removed
 
-    try {
-      // In a real implementation, this would move/copy files
-      console.log(`${clipboard.operation} operation:`, clipboard.items, 'to', currentPath);
-      
-      toast({
-        title: 'Success',
-        description: `${clipboard.items.length} item(s) ${clipboard.operation === 'copy' ? 'copied' : 'moved'}`
-      });
-
-      if (clipboard.operation === 'cut') {
-        setClipboard(null);
-      }
-      
-      await loadDirectory(currentPath);
-    } catch (error) {
-      console.error('Paste operation failed:', error);
-      toast({
-        title: 'Error',
-        description: 'Paste operation failed',
-        variant: 'destructive'
-      });
-    }
+  const handleStartRename = (item: FileSystemItem) => {
+    // Start inline rename mode
+    setRenamingItem(item.path);
   };
 
-  const handleRename = async (item: FileSystemItem) => {
+  const handleRename = async (oldPath: string, newName: string) => {
+    if (!newName.trim()) {
+      setRenamingItem(null);
+      return;
+    }
+
     try {
-      const success = await fileAPI.renameItem(item.path, item.name);
+      // Guard: Only allow rename when the item exists in the indexed tree
+      if (treeData) {
+        const normalized = oldPath.replace(/\//g, '|');
+        const nodeEntry = Object.entries(treeData.nodes).find(([_id, node]: [string, any]) => node.path_abs === normalized);
+        if (!nodeEntry) {
+          toast({
+            title: 'Not indexed',
+            description: 'This item is not in the indexed tree. Navigate using the File Tree and try again.',
+            variant: 'destructive'
+          });
+          setRenamingItem(null);
+          return;
+        }
+      }
+
+      setLoading(true);
+      const success = await fileAPI.renameItem(oldPath, newName);
+      
       if (success) {
-        await loadDirectory(currentPath);
+        // Ask backend to rebuild and return the latest tree
+        try {
+          const resp = await fetch('http://127.0.0.1:8001/refresh', { method: 'POST' });
+          if (resp.ok) {
+            const newTree = await resp.json();
+            setTreeData(newTree);
+          }
+        } catch {}
+
+        // Refresh the current view
+        if (currentNodeId && treeData) {
+          loadFolderFromTree(currentNodeId);
+        } else {
+          await loadDirectory(currentPath);
+        }
+
+        const oldName = oldPath.split('/').pop() || oldPath;
         toast({
           title: 'Success',
-          description: `Item renamed successfully`
+          description: `Renamed "${oldName}" to "${newName}"`
         });
+      } else {
+        throw new Error('Rename operation returned false');
       }
     } catch (error) {
       console.error('Rename failed:', error);
+      const oldName = oldPath.split('/').pop() || oldPath;
       toast({
         title: 'Error',
-        description: 'Failed to rename item',
+        description: `Failed to rename "${oldName}". Please try again.`,
         variant: 'destructive'
       });
+    } finally {
+      setLoading(false);
+      setRenamingItem(null); // Clear renaming state
     }
   };
 
@@ -238,8 +361,21 @@ export const FileExplorer: React.FC = () => {
       for (const itemPath of selectedItems) {
         await fileAPI.deleteItem(itemPath);
       }
-      
-      await loadDirectory(currentPath);
+
+      // Rebuild and reload the tree so the left panel updates too
+      try {
+        const resp = await fetch('http://127.0.0.1:8001/refresh', { method: 'POST' });
+        if (resp.ok) {
+          const newTree = await resp.json();
+          setTreeData(newTree);
+        }
+      } catch {}
+
+      if (currentNodeId && treeData) {
+        loadFolderFromTree(currentNodeId);
+      } else {
+        await loadDirectory(currentPath);
+      }
       setSelectedItems([]);
       
       toast({
@@ -257,14 +393,27 @@ export const FileExplorer: React.FC = () => {
   };
 
   const handleRefresh = () => {
-    if (isSearching) {
-      handleSearch(searchQuery);
-    } else {
-      loadDirectory(currentPath);
-    }
+    const doRefresh = async () => {
+      try {
+        const resp = await fetch('http://127.0.0.1:8001/refresh', { method: 'POST' });
+        if (resp.ok) {
+          const newTree = await resp.json();
+          setTreeData(newTree);
+        }
+      } catch {}
+
+      if (isSearching) {
+        handleSearch(searchQuery);
+      } else if (currentNodeId && treeData) {
+        loadFolderFromTree(currentNodeId);
+      } else {
+        loadDirectory(currentPath);
+      }
+    };
+    doRefresh();
   };
 
-  // Keyboard shortcuts
+  // Keyboard shortcuts (copy/paste removed)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement) return;
@@ -283,7 +432,7 @@ export const FileExplorer: React.FC = () => {
           if (selectedItems.length === 1) {
             const item = displayItems.find(item => item.path === selectedItems[0]);
             if (item) {
-              handleRename(item);
+              handleStartRename(item);
             }
           }
           break;
@@ -303,21 +452,10 @@ export const FileExplorer: React.FC = () => {
           break;
       }
 
-      // Ctrl/Cmd shortcuts
+      // Ctrl/Cmd shortcuts (copy/paste removed)
       if (e.ctrlKey || e.metaKey) {
         switch (e.key) {
-          case 'c':
-            e.preventDefault();
-            handleCopy();
-            break;
-          case 'x':
-            e.preventDefault();
-            handleCut();
-            break;
-          case 'v':
-            e.preventDefault();
-            handlePaste();
-            break;
+          // no-op
           case 'a':
             e.preventDefault();
             setSelectedItems(displayItems.map(item => item.path));
@@ -333,31 +471,68 @@ export const FileExplorer: React.FC = () => {
   return (
     <FluentProvider theme={webLightTheme}>
       <div className="flex h-screen bg-background text-foreground">
-        {/* Sidebar */}
-        <Sidebar 
-          currentPath={currentPath}
-          onNavigate={handleNavigate}
-        />
+        {/* TreeView Panel */}
+        <div className="w-80 border-r border-gray-200 bg-white">
+          <TreeView 
+            data={treeData}
+            onNodeSelect={(node) => {
+              console.log('Selected node:', node.name);
+              // For folders, load contents immediately on single click
+              if (node.is_dir === 1) {
+                loadFolderFromTree(node.id);
+              }
+            }}
+            onNodeDoubleClick={(node) => {
+              // Double-click behavior: load folder contents (same as single click for now)
+              if (node.is_dir === 1) {
+                loadFolderFromTree(node.id);
+              } else {
+                // For files, you could add "open file" functionality here
+                console.log('Double-clicked file:', node.name);
+              }
+            }}
+          />
+        </div>
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col min-w-0">
           {/* Command Bar */}
           <CommandBar
             selectedItems={selectedItems}
-            canPaste={Boolean(clipboard)}
             onNewFolder={handleNewFolder}
-            onCopy={handleCopy}
-            onPaste={handlePaste}
-            onCut={handleCut}
             onRename={() => {
               if (selectedItems.length === 1) {
                 const item = displayItems.find(item => item.path === selectedItems[0]);
-                if (item) handleRename(item);
+                if (item) handleStartRename(item);
               }
             }}
             onDelete={handleDelete}
             onRefresh={handleRefresh}
           />
+
+          {/* Create Folder Dialog */}
+          <Dialog open={isCreateDialogOpen} onOpenChange={(_e, data) => setIsCreateDialogOpen(!!data.open)}>
+            <DialogSurface>
+              <DialogBody>
+                <DialogTitle>Create new folder</DialogTitle>
+                <div className="p-2">
+                  <Input
+                    placeholder="Folder name"
+                    value={newFolderName}
+                    onChange={(e) => setNewFolderName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') submitCreateFolder();
+                    }}
+                    autoFocus
+                  />
+                </div>
+                <DialogActions>
+                  <Button appearance="secondary" onClick={() => { setIsCreateDialogOpen(false); setNewFolderName(''); }}>Cancel</Button>
+                  <Button appearance="primary" onClick={submitCreateFolder}>Create</Button>
+                </DialogActions>
+              </DialogBody>
+            </DialogSurface>
+          </Dialog>
 
           {/* Breadcrumb and Search */}
           <BreadcrumbBar
@@ -379,6 +554,8 @@ export const FileExplorer: React.FC = () => {
             onItemDoubleClick={handleItemDoubleClick}
             onSort={handleSort}
             onRename={handleRename}
+            renamingItem={renamingItem || undefined}
+            onStartRename={(path) => setRenamingItem(path)}
           />
 
           {/* Status Bar */}

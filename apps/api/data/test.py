@@ -4,6 +4,7 @@ from FileScraper import LanceDBManager
 db_path = "/Users/jean-pierrebenavidescruzatte/Clarity/test-folder"
 db = LanceDBManager(db_path)
 
+
 db.local_scrape("text", "images", "/Users/jean-pierrebenavidescruzatte/CompArchHW")
 lancedb = db.get_db()
 # Check what tables exist
