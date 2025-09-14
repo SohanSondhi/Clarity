@@ -13,8 +13,13 @@ router = APIRouter()
 # Load environment configuration
 load_dotenv(find_dotenv())
 
+# Use relative path from the API routes directory
+def get_default_db_path():
+    routes_dir = os.path.dirname(__file__)
+    return os.path.normpath(os.path.join(routes_dir, "../../../data/index"))
+
 # Defaults if not set in environment
-DB_PATH_DEFAULT = "C:/Professional/test-db"
+DB_PATH_DEFAULT = get_default_db_path()
 DB_TABLE_DEFAULT = "Hello"
 
 class RenameRequest(BaseModel):
@@ -222,7 +227,7 @@ async def check_rename_availability():
     Check if rename functionality is available (database accessible, etc.)
     """
     try:
-        db_path = "C:/Professional/test-db"
+        db_path = get_default_db_path()
         table_name = "Hello"
         
         db = lancedb.connect(db_path)

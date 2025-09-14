@@ -10,8 +10,13 @@ router = APIRouter()
 # Load environment variables
 load_dotenv(find_dotenv())
 
+# Use relative path from the API routes directory
+def get_default_db_path():
+    routes_dir = os.path.dirname(__file__)
+    return os.path.normpath(os.path.join(routes_dir, "../../../data/index"))
+
 # Defaults (matched with tree_creation.py)
-DB_PATH_DEFAULT = "C:/Professional/test-db"
+DB_PATH_DEFAULT = get_default_db_path()
 DB_TABLE_DEFAULT = "Hello"
 OUTPUT_PATH_DEFAULT = "../data/file_tree.json"
 

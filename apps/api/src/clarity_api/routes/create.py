@@ -13,7 +13,12 @@ router = APIRouter()
 
 load_dotenv(find_dotenv())
 
-DB_PATH_DEFAULT = "C:/Professional/test-db"
+# Use relative path from the API routes directory
+def get_default_db_path():
+    routes_dir = os.path.dirname(__file__)
+    return os.path.normpath(os.path.join(routes_dir, "../../../data/index"))
+
+DB_PATH_DEFAULT = get_default_db_path()
 DB_TABLE_DEFAULT = "Hello"
 
 
