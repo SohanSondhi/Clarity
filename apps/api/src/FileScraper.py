@@ -12,8 +12,8 @@ import pdfplumber
 from bs4 import BeautifulSoup as soup
 from sentence_transformers import SentenceTransformer
 
-#Image emedding imports 
-from image_embed import ImageEmbedder
+#Image embedding imports (match package path under clarity_api/indexing)
+from clarity_api.indexing.image_embed import ImageEmbedder
 from transformers import pipeline, BlipProcessor, BlipForConditionalGeneration
 from PIL import Image
 import torch 
@@ -150,11 +150,14 @@ class LanceDBManager():
                 filename = os.path.basename(file_path)
                 file_type = os.path.splitext(filename)[1].lower()
             else:
-                text_chunks = scraper.scrape()
+                print(f"Processing text file: {file_path}")
+                text_chunks = scraper.text_scrape()
                 if not text_chunks:
                     print(f"Skipping {file_path}: No text chunks returned.")
                     return
                 embeddings, summary = summarizer.summarize_text(text_chunks)
+                if hasattr(embeddings, 'tolist'):
+                    embeddings = embeddings.tolist()
                 file_stats = os.stat(file_path)
                 parent_path = os.path.dirname(file_path)
                 filename = os.path.basename(file_path)
@@ -224,11 +227,14 @@ class LanceDBManager():
                         embeddings, summary = summarizer.summarize_image(file_path)
                         print(f"Inserted data for {file_path} into table '{image_table_name}'")
                     else:
+                        print(f"Processing text file: {file_path}")
                         text_chunks = scraper.text_scrape()
                         if not text_chunks:
                             print(f"Skipping {file_path}: No text chunks returned.")
                             continue
                         embeddings, summary = summarizer.summarize_text(text_chunks)
+                        if hasattr(embeddings, 'tolist'):
+                            embeddings = embeddings.tolist()
 
                     file_stats = os.stat(file_path)
                     file_type = os.path.splitext(filename)[1].lower()
@@ -254,3 +260,17 @@ class LanceDBManager():
         self._db.create_table(text_table_name, schema=schema, data = text_data, mode="overwrite")
         self._db.create_table(image_table_name, schema=schema, data = image_data, mode="overwrite")
 
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description="Scrape a directory into LanceDB (text/image tables)")
+    parser.add_argument("root_dir", help="Root directory to index")
+    parser.add_argument("db_path", help="LanceDB path (directory)")
+    parser.add_argument("base_table", help="Base table name; will create <name>_text and <name>_image")
+    args = parser.parse_args()
+
+    text_table = f"{args.base_table}_text"
+    image_table = f"{args.base_table}_image"
+    db = LanceDBManager(args.db_path)
+    db.local_scrape(text_table, image_table, args.root_dir)
+    print(f"Completed scrape into tables: {text_table}, {image_table}")

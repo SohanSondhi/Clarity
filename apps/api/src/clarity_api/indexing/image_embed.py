@@ -1,6 +1,16 @@
+import os
 import numpy as np
 from PIL import Image
-from clarity_api.core import settings  # loads IMAGE_MODEL + IMAGE_BACKEND
+
+# Try to import global settings; fall back to sane defaults if unavailable
+try:
+    from clarity_api.core import settings  # type: ignore
+except Exception:
+    class _DefaultSettings:
+        IMAGE_BACKEND = os.getenv("IMAGE_BACKEND", "torch")
+        IMAGE_MODEL = os.getenv("IMAGE_MODEL", "openai/clip-vit-base-patch32")
+
+    settings = _DefaultSettings()
 
 
 class ImageEmbedder:

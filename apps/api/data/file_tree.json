@@ -179,6 +179,18 @@
       "when_created": 1757685987.3760233,
       "when_modified": 1757686319.2786524,
       "is_synthetic": false
+    },
+    "2f5ce045be598340ddb4b223ce1d0c83": {
+      "id": "2f5ce045be598340ddb4b223ce1d0c83",
+      "path_abs": "C:|Professional|ID.jpg",
+      "parent_id": "7b1966e6e112e51e41ea1c4221af246f",
+      "name": "ID.jpg",
+      "is_dir": 0,
+      "ext": "jpg",
+      "size_bytes": null,
+      "when_created": 1754349387.6651628,
+      "when_modified": 1754349388.0610511,
+      "is_synthetic": false
     }
   },
   "adjacency_list": {
@@ -189,7 +201,8 @@
       "4132c040cb4b4c7373433a5fd65711f6",
       "61bf7b0807d22dceaa2bb84898b944f4",
       "34ecf8e6c15c7b9d8280d2bc9d71233f",
-      "c930d7c59df154b7baaea6d6f76e4964"
+      "c930d7c59df154b7baaea6d6f76e4964",
+      "2f5ce045be598340ddb4b223ce1d0c83"
     ],
     "4132c040cb4b4c7373433a5fd65711f6": [
       "46a03c086c7bcc40db85bf9ad71fd5db",
@@ -207,8 +220,8 @@
     "8d6095a666c371a003417bc3edbf2b0f"
   ],
   "metadata": {
-    "total_nodes": 15,
-    "total_files": 12,
+    "total_nodes": 16,
+    "total_files": 13,
     "total_directories": 3,
     "synthetic_directories": 3
   }
