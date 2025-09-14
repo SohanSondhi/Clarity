@@ -125,13 +125,13 @@ class Summarizer:
 class LanceDBManager():
 
     def __init__(self, db_path):
-        self.db = lancedb.connect(db_path)
+        self._db = lancedb.connect(db_path)
     
     def get_db (self):
-        return self.db
+        return self._db
     
     def add_data(self, table_name, file_path):   
-        if table_name in self.db.table_names():
+        if table_name in self._db.table_names():
             scraper = FileScraper(file_path)
             summarizer = Summarizer()
             if os.path.splitext(file_path)[1].lower() in ('.png', '.jpg', '.jpeg'):
@@ -161,15 +161,15 @@ class LanceDBManager():
                 "Description": summary,
                 "File_type": file_type
             }
-            self.db.insert(table_name, [json_entry])
+            self._db.insert(table_name, [json_entry])
         else:
             raise ValueError(f"Table {table_name} does not exist in the database.")  
 
     def remove_data(self, table_name, file_path):
-        if table_name not in self.db.table_names():
+        if table_name not in self._db.table_names():
             raise ValueError(f"Table {table_name} does not exist in the database.")
         
-        table = self.db.open_table(table_name)
+        table = self._db.open_table(table_name)
         deleted = table.delete(where=f'Path == "{file_path}"')
 
         if deleted > 0:
@@ -178,8 +178,8 @@ class LanceDBManager():
             print(f"⚠️ No entry found for {file_path} in table '{table_name}'")
             
     def get_table(self, table_name):
-        if table_name in self.db.table_names():
-            return self.db.open_table(table_name)
+        if table_name in self._db.table_names():
+            return self._db.open_table(table_name)
         else:
             raise ValueError(f"Table {table_name} does not exist in the database.")
         
