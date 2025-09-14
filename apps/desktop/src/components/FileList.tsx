@@ -111,14 +111,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ index, style, data }) => {
 
   const handleOpen = () => {
     // Single-click open behavior
-    if (item.type === 'folder') {
-      onItemDoubleClick(item);
-    } else {
-      // Open file with system default application via Electron
-      const fullPath = item.path.replace(/\//g, '\\');
-      // @ts-ignore - exposed in preload
-      window.api?.openPath?.(fullPath);
-    }
+    onItemDoubleClick(item);
   };
 
 

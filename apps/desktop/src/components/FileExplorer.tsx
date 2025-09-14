@@ -156,20 +156,21 @@ export const FileExplorer: React.FC = () => {
     });
   }, [displayItems]);
 
-  const handleItemDoubleClick = useCallback((item: FileSystemItem) => {
+  const handleItemDoubleClick = useCallback(async (item: FileSystemItem) => {
     if (item.type === 'folder') {
       // Try to navigate using tree data first, then fallback to file system
       handleNavigate(item.path);
     } else {
-      // Open file in system default application
-      if ((window as any)?.clarity?.openInSystem) {
-        (window as any).clarity.openInSystem(item.path);
+      // Open file in system default application via Electron IPC
+      const fullPath = item.path.replace(/\//g, '\\');
+      const api = (window as any)?.api;
+      if (api?.openPath) {
+        const res = await api.openPath(fullPath);
+        if (!res?.success) {
+          toast({ title: 'Open failed', description: res?.error || 'Unknown error', variant: 'destructive' });
+        }
       } else {
-        console.log('Would open file:', item.path);
-        toast({
-          title: 'File Action',
-          description: `Would open ${item.name} in system default application`
-        });
+        toast({ title: 'Unavailable', description: 'Desktop bridge not available. Restart the app.', variant: 'destructive' });
       }
     }
   }, [handleNavigate, toast]);

@@ -87,7 +87,19 @@ function createWindow(): void {
     show: false,
     autoHideMenuBar: true,
     webPreferences: {
-      preload: join(__dirname, 'preload.js'),
+      // Resolve preload path across dev/build (.js/.mjs)
+      preload: (() => {
+        const candidates = [
+          join(__dirname, '../preload/preload.js'),
+          join(__dirname, '../preload/preload.cjs'),
+          join(__dirname, '../preload/preload.mjs'),
+          join(__dirname, 'preload.js'),
+        ]
+        for (const p of candidates) {
+          if (existsSync(p)) return p
+        }
+        return join(__dirname, 'preload.js')
+      })(),
       sandbox: false,
       nodeIntegration: false,
       contextIsolation: true
