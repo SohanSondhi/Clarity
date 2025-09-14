@@ -105,6 +105,37 @@ class Summarizer:
 class LanceDBManager(): 
     def __init__(self, db_path):
         self.db = lancedb.connect(db_path)
+    
+    def add_data(self, table_name, file_path):   
+        if table_name in self.db.table_names():
+            scraper = FileScraper(file_path)
+            text_chunks = scraper.scrape()
+            if not text_chunks:
+                print(f"Skipping {file_path}: No text chunks returned.")
+                return
+            summarizer = Summarizer()
+            summary, embeddings, similarities = summarizer.summarize(text_chunks)
+            file_stats = os.stat(file_path)
+            parent_path = os.path.dirname(file_path)
+            filename = os.path.basename(file_path)
+            file_type = os.path.splitext(filename)[1].lower()
+            json_entry = {
+                "Path": file_path,
+                "Parent": parent_path,
+                "Vector": embeddings.tolist(),  # Convert numpy array to list
+                "Similarities": similarities.tolist(),  # Convert numpy array to list
+                "Name": filename,
+                "When_Created": float(file_stats.st_ctime),
+                "When_Last_Modified": float(file_stats.st_mtime),
+                "Description": summary,
+                "File_type": file_type
+            }
+            self.db.insert(table_name, [json_entry])
+        else:
+            raise ValueError(f"Table {table_name} does not exist in the database.")  
+
+        
+    
 
     def create_table(self, table_name, data):
         schema = pa.schema([
