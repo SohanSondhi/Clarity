@@ -109,6 +109,18 @@ const ItemRow: React.FC<ItemRowProps> = ({ index, style, data }) => {
     onItemDoubleClick(item);
   };
 
+  const handleOpen = () => {
+    // Single-click open behavior
+    if (item.type === 'folder') {
+      onItemDoubleClick(item);
+    } else {
+      // Open file with system default application via Electron
+      const fullPath = item.path.replace(/\//g, '\\');
+      // @ts-ignore - exposed in preload
+      window.api?.openPath?.(fullPath);
+    }
+  };
+
 
   const handleRenameSubmit = () => {
     if (renameName !== item.name && renameName.trim()) {
@@ -159,8 +171,9 @@ const ItemRow: React.FC<ItemRowProps> = ({ index, style, data }) => {
       className={`flex items-center px-3 py-1 border-b border-explorer-grid cursor-pointer hover:bg-explorer-item-hover ${
         isSelected ? 'bg-explorer-item-selected' : ''
       }`}
-      onClick={handleClick}
+      onClick={handleOpen}
       onDoubleClick={handleDoubleClick}
+      onDoubleClickCapture={(e) => e.preventDefault()}
       onContextMenu={(e) => {
         e.preventDefault();
         // TODO: Show context menu
@@ -193,7 +206,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ index, style, data }) => {
               onClick={(e) => e.stopPropagation()}
             />
           ) : (
-            <span className="text-sm truncate block">{item.name}</span>
+            <span className="text-sm truncate block" onClick={(e) => { e.stopPropagation(); handleOpen(); }}>{item.name}</span>
           )}
         </div>
       </div>

@@ -6,6 +6,7 @@ import os
 import json
 from typing import Optional, List
 from dotenv import load_dotenv, find_dotenv
+import shutil
 
 router = APIRouter()
 
@@ -131,6 +132,19 @@ async def rename_item(request: RenameRequest, background_tasks: BackgroundTasks)
             new_path_normalized = safe_new_name
 
         print(f"Renaming: {old_path_normalized} -> {new_path_normalized}")
+
+        # Perform filesystem rename if possible
+        try:
+            old_fs = old_path_normalized.replace('|', os.sep)
+            new_fs = new_path_normalized.replace('|', os.sep)
+            old_fs_abs = old_fs
+            new_fs_abs = new_fs
+            if os.path.exists(old_fs_abs):
+                os.makedirs(os.path.dirname(new_fs_abs), exist_ok=True) if os.path.dirname(new_fs_abs) else None
+                os.replace(old_fs_abs, new_fs_abs)
+        except Exception as fs_err:
+            # Do not fail the whole request on FS error; continue to DB update
+            print(f"Filesystem rename warning: {fs_err}")
 
         # Update the main item if it exists
         if not main_items.empty:

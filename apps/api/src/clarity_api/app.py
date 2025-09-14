@@ -6,6 +6,8 @@ import uvicorn
 from .routes.tree import router as tree_router
 from .routes.rename import router as rename_router
 from .routes.refresh import router as refresh_router
+from .routes.delete import router as delete_router
+from .routes.create import router as create_router
 
 app = FastAPI(
     title="Clarity API",
@@ -26,6 +28,8 @@ app.add_middleware(
 app.include_router(tree_router, tags=["tree"])
 app.include_router(rename_router, tags=["rename"])
 app.include_router(refresh_router, tags=["refresh"])
+app.include_router(delete_router, tags=["delete"])
+app.include_router(create_router, tags=["create"])
 
 @app.get("/")
 async def root():

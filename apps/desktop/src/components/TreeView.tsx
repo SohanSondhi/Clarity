@@ -164,8 +164,7 @@ export const TreeView: React.FC<TreeViewProps> = ({
             isSelected ? 'bg-blue-100 text-blue-800' : ''
           }`}
           style={{ paddingLeft: `${level * 20 + 8}px` }}
-          onClick={() => handleNodeClick(node)}
-          onDoubleClick={() => handleNodeDoubleClick(node)}
+          onClick={() => handleNodeDoubleClick(node)}
         >
           {/* Expand/collapse icon */}
           <div className="w-4 h-4 mr-1 flex items-center justify-center">

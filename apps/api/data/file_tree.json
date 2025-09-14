@@ -36,11 +36,11 @@
       "when_modified": null,
       "is_synthetic": true
     },
-    "216af948202509b08b34f31ae6e6dfef": {
-      "id": "216af948202509b08b34f31ae6e6dfef",
-      "path_abs": "C:|Professional|August.pdf",
+    "61bf7b0807d22dceaa2bb84898b944f4": {
+      "id": "61bf7b0807d22dceaa2bb84898b944f4",
+      "path_abs": "C:|Professional|August_Resume_AnthonyLamelas.pdf",
       "parent_id": "7b1966e6e112e51e41ea1c4221af246f",
-      "name": "August.pdf",
+      "name": "August_Resume_AnthonyLamelas.pdf",
       "is_dir": 0,
       "ext": "pdf",
       "size_bytes": null,
@@ -48,11 +48,11 @@
       "when_modified": 1755647208.5621774,
       "is_synthetic": false
     },
-    "239d96f9b036c845c388de37f157f204": {
-      "id": "239d96f9b036c845c388de37f157f204",
-      "path_abs": "C:|Professional|August_Resume_AnthonyLamela_26.pdf",
+    "34ecf8e6c15c7b9d8280d2bc9d71233f": {
+      "id": "34ecf8e6c15c7b9d8280d2bc9d71233f",
+      "path_abs": "C:|Professional|August_Resume_AnthonyLamelas_26.pdf",
       "parent_id": "7b1966e6e112e51e41ea1c4221af246f",
-      "name": "August_Resume_AnthonyLamela_26.pdf",
+      "name": "August_Resume_AnthonyLamelas_26.pdf",
       "is_dir": 0,
       "ext": "pdf",
       "size_bytes": null,
@@ -179,6 +179,42 @@
       "when_created": 1757685987.3760233,
       "when_modified": 1757686319.2786524,
       "is_synthetic": false
+    },
+    "6d5ae28d074d6c91a52cb85555205281": {
+      "id": "6d5ae28d074d6c91a52cb85555205281",
+      "path_abs": "C:|Professional|Test_44",
+      "parent_id": "7b1966e6e112e51e41ea1c4221af246f",
+      "name": "Test_44",
+      "is_dir": 1,
+      "ext": "",
+      "size_bytes": null,
+      "when_created": 1757821085.6468534,
+      "when_modified": 1757821085.6468534,
+      "is_synthetic": false
+    },
+    "601159e05765a22177c445c48c6c3729": {
+      "id": "601159e05765a22177c445c48c6c3729",
+      "path_abs": "C:|Professional|bobby",
+      "parent_id": "7b1966e6e112e51e41ea1c4221af246f",
+      "name": "bobby",
+      "is_dir": 1,
+      "ext": "",
+      "size_bytes": null,
+      "when_created": 1757821138.0710182,
+      "when_modified": 1757821138.0710182,
+      "is_synthetic": false
+    },
+    "3c30dc5cf9dc165b6d43f6ed000ff38c": {
+      "id": "3c30dc5cf9dc165b6d43f6ed000ff38c",
+      "path_abs": "C:|Professional|TEsty",
+      "parent_id": "7b1966e6e112e51e41ea1c4221af246f",
+      "name": "TEsty",
+      "is_dir": 1,
+      "ext": "",
+      "size_bytes": null,
+      "when_created": 1757821315.6714144,
+      "when_modified": 1757821315.6714144,
+      "is_synthetic": false
     }
   },
   "adjacency_list": {
@@ -186,9 +222,12 @@
       "7b1966e6e112e51e41ea1c4221af246f"
     ],
     "7b1966e6e112e51e41ea1c4221af246f": [
+      "601159e05765a22177c445c48c6c3729",
       "4132c040cb4b4c7373433a5fd65711f6",
-      "216af948202509b08b34f31ae6e6dfef",
-      "239d96f9b036c845c388de37f157f204",
+      "6d5ae28d074d6c91a52cb85555205281",
+      "3c30dc5cf9dc165b6d43f6ed000ff38c",
+      "61bf7b0807d22dceaa2bb84898b944f4",
+      "34ecf8e6c15c7b9d8280d2bc9d71233f",
       "c930d7c59df154b7baaea6d6f76e4964"
     ],
     "4132c040cb4b4c7373433a5fd65711f6": [
@@ -207,9 +246,9 @@
     "8d6095a666c371a003417bc3edbf2b0f"
   ],
   "metadata": {
-    "total_nodes": 15,
+    "total_nodes": 18,
     "total_files": 12,
-    "total_directories": 3,
+    "total_directories": 6,
     "synthetic_directories": 3
   }
 }

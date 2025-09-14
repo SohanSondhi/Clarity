@@ -2,7 +2,7 @@ import { contextBridge, ipcRenderer } from 'electron'
 
 // Custom APIs for renderer
 const api = {
-  // Add any custom APIs here
+  openPath: (path: string) => ipcRenderer.invoke('open-path', path)
 }
 
 // Basic electron API

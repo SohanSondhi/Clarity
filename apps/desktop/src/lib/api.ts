@@ -127,20 +127,9 @@ class FileExplorerAPI {
   ];
 
   async getDirectoryContents(path: string): Promise<FileSystemItem[]> {
-    try {
-      // Directory endpoint is disabled - we're using tree data instead
-      console.log('Directory endpoint disabled - using tree data instead');
-      throw new Error('Directory endpoint disabled');
-      
-    } catch (error) {
-      console.warn('Directory API disabled, using mock data:', error);
-      // Return mock data filtered by path
-      return this.mockFiles.filter(item => 
-        item.path.startsWith(path) && 
-        item.path !== path &&
-        !item.path.substring(path.length + 1).includes('/')
-      );
-    }
+    // Right pane mirrors the indexed tree; we don't call a backend directory API.
+    // Return empty here; the component populates from tree data when available.
+    return [];
   }
 
   async searchFiles(query: string): Promise<SearchResult> {
@@ -185,18 +174,19 @@ class FileExplorerAPI {
 
   async createFolder(path: string, name: string): Promise<boolean> {
     try {
+      // Convert parent path to '|' delimiter format for backend
+      const parent_path = path.replace(/\//g, '|');
       const response = await fetch(`${this.baseUrl}/create-folder`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ path, name }),
+        body: JSON.stringify({ parent_path, name }),
       });
-      
       return response.ok;
     } catch (error) {
-      console.warn('Create folder API not available, simulating success:', error);
-      return true;
+      console.error('Create folder API error:', error);
+      return false;
     }
   }
 
@@ -216,6 +206,7 @@ class FileExplorerAPI {
       return true;
     }
   }
+
 
   async renameItem(oldPath: string, newName: string): Promise<boolean> {
     try {

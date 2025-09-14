@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell } from "electron";
+import { app, BrowserWindow, ipcMain, shell } from "electron";
 import { join } from "path";
 import { spawn } from "child_process";
 import { existsSync } from "fs";
@@ -108,4 +108,12 @@ app.on("window-all-closed", () => {
 });
 app.on("before-quit", () => {
   stopPythonBackend();
+});
+ipcMain.handle("open-path", async (_event, path) => {
+  try {
+    await shell.openPath(path);
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: String(e) };
+  }
 });
