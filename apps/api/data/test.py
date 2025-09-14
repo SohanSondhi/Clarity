@@ -1,21 +1,18 @@
-import lancedb
-import pandas as pd
-import os
+from FileScraper import LanceDBManager
 
 # Connect to your database with correct path
-db_path = "/Users/jean-pierrebenavidescruzatte/test-db/"
-print(f"Connecting to database at: {os.path.abspath(db_path)}")
+db_path = "/Users/jean-pierrebenavidescruzatte/Clarity/test-folder"
+db = LanceDBManager(db_path)
 
-db = lancedb.connect(db_path)
-
-
+db.local_scrape("text", "images", "/Users/jean-pierrebenavidescruzatte/CompArchHW")
+lancedb = db.get_db()
 # Check what tables exist
-print(f"Available tables: {db.table_names()}")
+print(f"Available tables: {lancedb.table_names()}")
 
 # Check if the 'Hello' table exists
-if "Hello" in db.table_names():
+for table_name in lancedb.table_names():
     # Open your table
-    table = db.open_table("Hello")
+    table = lancedb.open_table(table_name)
     
     # Read all data
     df = table.to_pandas()
@@ -30,6 +27,3 @@ if "Hello" in db.table_names():
     
     # Show column names
     print(f"Columns: {df.columns.tolist()}")
-else:
-    print("Table 'db' does not exist. You may need to run the FileScraper first to create the table.")
-    print("The database exists but is empty or the table hasn't been created yet.")
