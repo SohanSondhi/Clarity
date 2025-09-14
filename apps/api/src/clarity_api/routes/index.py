@@ -136,7 +136,14 @@ async def run_full_index(req: IndexRequest):
     """
     try:
         # Defaults aligned with tree_creation.py and refresh.py
-        db_path = req.db_path or os.getenv("DB_PATH", "C:/Professional/test-db")
+        if req.db_path:
+            db_path = req.db_path
+        else:
+            # Use relative path from the API routes directory
+            routes_dir = os.path.dirname(__file__)
+            # Go up to api/src, then down to data
+            default_db_path = os.path.normpath(os.path.join(routes_dir, "../../../data/index"))
+            db_path = os.getenv("DB_PATH", default_db_path)
         base_table = req.table_name or os.getenv("DB_TABLE", "Hello")
         output_path = req.output_path or os.getenv("OUTPUT_PATH", "../data/file_tree.json")
 

@@ -37,12 +37,18 @@ async def clear_data(req: ClearRequest):
     """
     Clears the LanceDB database directory and deletes the generated tree JSON file.
     Defaults:
-      - DB_PATH from env or "C:/Professional/test-db"
+      - DB_PATH from env or relative path to data/index
       - OUTPUT_PATH from env or "../data/file_tree.json"
     """
     try:
         project_src_dir = _resolve_project_src_dir()
-        db_path = req.db_path or os.getenv("DB_PATH", "C:/Professional/test-db")
+        if req.db_path:
+            db_path = req.db_path
+        else:
+            # Use relative path from the API routes directory
+            routes_dir = os.path.dirname(__file__)
+            default_db_path = os.path.normpath(os.path.join(routes_dir, "../../../data/index"))
+            db_path = os.getenv("DB_PATH", default_db_path)
         output_path = req.output_path or os.getenv("OUTPUT_PATH", "../data/file_tree.json")
 
         # Clear LanceDB directory

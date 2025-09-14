@@ -1,7 +1,15 @@
 import numpy as np
 import lancedb
 from sklearn.metrics.pairwise import cosine_similarity
-from apps.api.data.FileScraper import Summarizer
+import sys
+import os
+
+# Add the project src directory to the path
+current_dir = os.path.dirname(__file__)
+project_src_dir = os.path.normpath(os.path.join(current_dir, "../../"))
+sys.path.insert(0, project_src_dir)
+
+from FileScraper import Summarizer
 
 
 class TextSearcher:
@@ -36,6 +44,6 @@ class TextSearcher:
 
 
 if __name__ == "__main__":
-    searcher = TextSearcher("apps/api/data/clarity_db")
+    searcher = TextSearcher("C:/Users/sohan/Clarity/Clarity/apps/api/data/clarity_db")
     query = "deep learning methods for image recognition"
     print("Best match path:", searcher.search(query))

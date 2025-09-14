@@ -11,6 +11,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+apps/api/data/file_tree.json
+apps/desktop/out/preload/preload.mjs
+apps/desktop/out/main/main.js
+
 # Python
 **/__pycache__/
 *.py[cod]

@@ -67,3 +67,25 @@ class ImageEmbedder:
         vec = vec / (norm + 1e-10)  # 1e-10 = safety against div/0
 
         return vec
+
+    def embed_text(self, text: str) -> np.ndarray:
+        """Generate an embedding vector for the given text using CLIP."""
+        if self.backend == "torch":
+            # HuggingFace CLIP text embedding
+            import torch
+            inputs = self.processor(text=[text], return_tensors="pt", padding=True).to(self.device)
+            with torch.no_grad():
+                vec = self.model.get_text_features(**inputs)
+            vec = vec.cpu().numpy().astype("float32")
+            
+            # Ensure we return a 2D array (batch_size, embedding_dim)
+            if vec.ndim == 1:
+                vec = vec.reshape(1, -1)
+        else:
+            raise ValueError(f"Text embedding not supported for backend: {self.backend}")
+
+        # Normalize vector (cosine similarity works best on unit vectors)
+        norm = np.linalg.norm(vec, axis=1, keepdims=True)
+        vec = vec / (norm + 1e-10)  # 1e-10 = safety against div/0
+
+        return vec
