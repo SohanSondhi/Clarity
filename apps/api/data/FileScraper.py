@@ -158,7 +158,11 @@ class LanceDBManager():
             raise ValueError(f"Table {table_name} does not exist in the database.")
         
     def local_scrape(self, table_name, root_dir):
-        exclude_dirs = {'/System', '/Library', '/private', '/dev', '/Volumes', '/Applications', '/usr', '/bin', '/sbin', '/etc', '/proc', '/tmp'}
+        is_mac = os.name != 'nt'
+        exclude_dirs = {
+            '/System', '/Library', '/private', '/dev', '/Volumes', '/Applications', '/usr', '/bin', '/sbin', '/etc', '/proc', '/tmp',
+            'C:\\Windows', 'C:\\Program Files', 'C:\\Program Files (x86)', 'C:\\Users\\All Users', 'C:\\ProgramData'
+        }
         seen_files = set()
         summarizer = Summarizer()
         data = []
@@ -167,7 +171,7 @@ class LanceDBManager():
             dirnames[:] = [d for d in dirnames if os.path.join(dirpath, d) not in exclude_dirs]
             for filename in filenames:
                 parent_path = os.path.abspath(dirpath)
-                file_id = f"{parent_path}/{filename}"
+                file_id = os.path.join(parent_path, filename)
                 if file_id in seen_files:
                     print(f"Skipping already seen file: {file_id}")
                     continue  
@@ -185,8 +189,8 @@ class LanceDBManager():
                     json_entry = {
                         "Path": file_path,
                         "Parent": parent_path,
-                        "Vector": embeddings.tolist(),  # Convert numpy array to list
-                        "Similarities": similarities.tolist(),  # Convert numpy array to list
+                        "Vector": embeddings.tolist(),
+                        "Similarities": similarities.tolist(),
                         "Name": filename,
                         "When_Created": float(file_stats.st_ctime),
                         "When_Last_Modified": float(file_stats.st_mtime),
@@ -199,16 +203,3 @@ class LanceDBManager():
                     print(f"Error processing {file_path}: {e}")
         if len(data) > 0:  
             self.create_table(table_name, data)
-            
-
-        
-if __name__ == "__main__":
-    ROOT_DIR = "/Users/jean-pierrebenavidescruzatte/CompArchHW"
-    DB_PATH = "/Users/jean-pierrebenavidescruzatte/test-db"
-    TABLE_NAME = "Hello"
-
-    # Initialize LanceDB manager
-    db_manager = LanceDBManager(DB_PATH)
-
-    # Scrape local files and populate the database
-    db_manager.local_scrape(TABLE_NAME, ROOT_DIR)
