@@ -1,16 +1,17 @@
 import os
-import json
-import docx
-import pdfplumber
-from bs4 import BeautifulSoup as soup
-from transformers import pipeline, BlipProcessor, BlipForConditionalGeneration
-from sentence_transformers import SentenceTransformer
 import lancedb
 import pandas as pd
 import pyarrow as pa
 
+#Text scraping/embedding imports 
+import docx
+import pdfplumber
+from bs4 import BeautifulSoup as soup
+from sentence_transformers import SentenceTransformer
+
 #Image emedding imports 
 from image_embed import ImageEmbedder
+from transformers import pipeline, BlipProcessor, BlipForConditionalGeneration
 from PIL import Image
 import torch 
 
